@@ -827,18 +827,91 @@ enemySpots = {
     "Jack Noir": (0, 150)
 }
 
-# Estimation
-# 0, 0 is top left
-# 500, 0 is top right
-# 0, 200 is bottom left
-# 500, 200 is bottom right
+# Character "feet" positions - where the character's feet/bottom-middle are located within their sprite
+# Format: (x_offset_from_left, y_offset_from_top)
+# By default, feet are at (width/2, height), but can be adjusted manually for fine-tuning
+characterFeet = {
+    "r_abraize": (53, 252),
+    "r_abraize2": (57, 226),
+    "sr_abraize": (87, 235),  # File doesn't exist yet, using estimated values
+    "ssr_abraize": (87, 235),
+    "r_trey": (72, 263),  # File doesn't exist yet, using estimated values
+    "sr_trey": (68, 263),
+    "ssr_trey": (72, 291),
+    "r_noah": (39, 214),
+    "r_freeman": (49, 241),
+    "sr_freeman": (57, 206),
+    "ssr_jayden": (56, 278),
+    "r_stephen": (52, 215),
+    "sr_stephen": (72, 222),
+    "sr_homestuck": (117, 228),
+    "ssr_scottie": (55, 283),
+}
 
-# The issue is that each character is slightly different sizes
+# Special Y-axis adjustments for floating characters
+characterFloatingOffset = {
+    "ssr_scottie": -20,  # Negative because we want to move up (floating effect)
+}
 
-# 1. Manual hashmap of getting coordinates of feet per character
-# 2. spots for feet of each character to be placed
-# 3. paste character image at (x, y - character_height + feet_offset)
-charSpots = [(450, 195), (300, 170), (540, 150), (380, 90)]
+# Target ground positions for team slots on the battle screen
+# These are the positions where character feet should be placed
+# Format: (x, y) - coordinates on the background where feet touch the ground
+teamSlotGroundPositions = [
+    (500, 400),  # Slot 1 - front right
+    (380, 380),  # Slot 2 - middle right  
+    (580, 360),  # Slot 3 - back right
+    (460, 340),  # Slot 4 - far back
+]
+
+def calculate_character_position(char_name, slot_index, background_size):
+    """
+    Calculate the paste position for a character based on their feet position.
+    
+    Args:
+        char_name: Character identifier (e.g., "r_abraize")
+        slot_index: Team slot index (0-3)
+        background_size: Tuple of (width, height) of the background image
+        
+    Returns:
+        Tuple of (x, y) coordinates where the character image should be pasted
+    """
+    # Get the target ground position for this slot
+    target_x, target_y = teamSlotGroundPositions[slot_index]
+    
+    # Get the character's feet position within their sprite
+    feet_x, feet_y = characterFeet.get(char_name, (0, 0))
+    
+    # Calculate where to paste the character so their feet align with the target
+    paste_x = target_x - feet_x
+    paste_y = target_y - feet_y
+    
+    # Apply floating offset if this character is a floater
+    floating_offset = characterFloatingOffset.get(char_name, 0)
+    paste_y += floating_offset
+    
+    # Prevent cutoff on the right edge
+    char_image_path = characterImages.get(char_name)
+    if char_image_path and os.path.exists(char_image_path):
+        char_img = Image.open(char_image_path)
+        char_width, char_height = char_img.size
+        
+        # Ensure character doesn't go off the right edge
+        if paste_x + char_width > background_size[0]:
+            paste_x = background_size[0] - char_width
+        
+        # Ensure character doesn't go off the bottom edge
+        if paste_y + char_height > background_size[1]:
+            paste_y = background_size[1] - char_height
+        
+        # Ensure character doesn't go off the left edge
+        if paste_x < 0:
+            paste_x = 0
+            
+        # Ensure character doesn't go off the top edge
+        if paste_y < 0:
+            paste_y = 0
+    
+    return (int(paste_x), int(paste_y))
 
 
 @bot.tree.command(name = "battle")
@@ -867,13 +940,9 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
 
     # comnbine background and r_abraize images ontop one another using PIL
     background_image = Image.open(background_file)
-    char1_image = Image.open(characterImages[team[0]])
-    char2_image = Image.open(characterImages[team[1]])
-    char3_image = Image.open(characterImages[team[2]])
-    char4_image = Image.open(characterImages[team[3]])
-   # enemy_image = Image.open(enemyImages[enemies.name])
-
-   # randomSpot = random.randint(0, 3)
+    background_size = background_image.size
+    
+    # Place enemies first (in the background layer)
     if enemies.name == "Grunt":
         enemy_image = Image.open(enemyImages[enemies.name])
         background_image.paste(enemy_image, enemySpots[enemies.name], enemy_image)
@@ -898,10 +967,14 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
         enemy_image = Image.open(enemyImages[enemies.name])
         background_image.paste(enemy_image, enemySpots[enemies.name], enemy_image)
 
-    background_image.paste(char1_image, charSpots[0], char1_image)
-    background_image.paste(char2_image, charSpots[1], char2_image)
-    background_image.paste(char3_image, charSpots[2], char3_image)
-    background_image.paste(char4_image, charSpots[3], char4_image)
+    # Place team characters dynamically based on their feet positions
+    for i, char_name in enumerate(team):
+        if char_name in characterImages:
+            char_image_path = characterImages[char_name]
+            if os.path.exists(char_image_path):
+                char_image = Image.open(char_image_path)
+                char_position = calculate_character_position(char_name, i, background_size)
+                background_image.paste(char_image, char_position, char_image)
 
     # save the combined image to a new file
     combined_image_path = "./battle_screen.png"
