@@ -892,11 +892,12 @@ characterFloatingOffset = {
 # Target ground positions for team slots on the battle screen
 # These are the positions where character feet should be placed
 # Format: (x, y) - coordinates on the background where feet touch the ground
+# Note: These use 0-based indexing (slot_index 0-3 in code)
 teamSlotGroundPositions = [
-    (500, 400),  # Slot 1 - front right
-    (380, 380),  # Slot 2 - middle right  
-    (580, 360),  # Slot 3 - back right
-    (460, 340),  # Slot 4 - far back
+    (500, 400),  # Index 0 (Slot 1 in /viewteam) - front right
+    (380, 380),  # Index 1 (Slot 2 in /viewteam) - middle right  
+    (580, 360),  # Index 2 (Slot 3 in /viewteam) - back right
+    (460, 340),  # Index 3 (Slot 4 in /viewteam) - far back
 ]
 
 def calculate_character_position(char_name, slot_index, background_size):
@@ -915,7 +916,19 @@ def calculate_character_position(char_name, slot_index, background_size):
     target_x, target_y = teamSlotGroundPositions[slot_index]
     
     # Get the character's feet position within their sprite
-    feet_x, feet_y = characterFeet.get(char_name, (0, 0))
+    # If not defined, calculate default position from the image
+    if char_name not in characterFeet:
+        char_image_path = characterImages.get(char_name)
+        if char_image_path and os.path.exists(char_image_path):
+            char_img = Image.open(char_image_path)
+            char_width, char_height = char_img.size
+            # Default: bottom-middle of the image
+            feet_x, feet_y = char_width // 2, char_height
+        else:
+            # Fallback if image doesn't exist
+            feet_x, feet_y = 0, 0
+    else:
+        feet_x, feet_y = characterFeet[char_name]
     
     # Calculate where to paste the character so their feet align with the target
     paste_x = target_x - feet_x
@@ -925,7 +938,7 @@ def calculate_character_position(char_name, slot_index, background_size):
     floating_offset = characterFloatingOffset.get(char_name, 0)
     paste_y += floating_offset
     
-    # Prevent cutoff on the right edge
+    # Prevent cutoff on the edges
     char_image_path = characterImages.get(char_name)
     if char_image_path and os.path.exists(char_image_path):
         char_img = Image.open(char_image_path)
