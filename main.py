@@ -827,6 +827,40 @@ enemySpots = {
     "Jack Noir": (0, 150)
 }
 
+# ============================================================================
+# DYNAMIC CHARACTER POSITIONING SYSTEM
+# ============================================================================
+#
+# This system ensures characters are properly placed on the battle screen
+# based on their "feet" position, preventing cutoff issues.
+#
+# HOW TO ADD A NEW CHARACTER:
+# 1. Add the character's PNG file to the repository
+# 2. Add an entry to characterImages dictionary (already done for most)
+# 3. Calculate the character's feet position:
+#    - Open the character image
+#    - Find the width and height (e.g., using PIL: Image.open("char.png").size)
+#    - Default feet position is (width/2, height) - bottom-middle of image
+#    - Add entry to characterFeet dictionary below
+# 4. If the character floats, add an entry to characterFloatingOffset
+#    - Use negative values to move up (floating)
+#    - Use positive values to move down
+#
+# HOW TO FINE-TUNE CHARACTER POSITIONING:
+# 1. Run the battle command and examine the output
+# 2. If a character's feet don't align properly:
+#    - Adjust the X coordinate in characterFeet to shift left/right
+#    - Adjust the Y coordinate in characterFeet to change where feet are
+# 3. If a character should float or sink:
+#    - Add/modify entry in characterFloatingOffset
+#
+# EXAMPLE:
+# For a character image that is 100x200 pixels:
+# - Default feet position would be (50, 200) - center bottom
+# - If feet are actually 10 pixels from the left: use (10, 200)
+# - If character should float 15 pixels up: add to characterFloatingOffset with value -15
+# ============================================================================
+
 # Character "feet" positions - where the character's feet/bottom-middle are located within their sprite
 # Format: (x_offset_from_left, y_offset_from_top)
 # By default, feet are at (width/2, height), but can be adjusted manually for fine-tuning
@@ -849,8 +883,10 @@ characterFeet = {
 }
 
 # Special Y-axis adjustments for floating characters
+# Negative values move character UP (floating effect)
+# Positive values move character DOWN (sinking effect)
 characterFloatingOffset = {
-    "ssr_scottie": -20,  # Negative because we want to move up (floating effect)
+    "ssr_scottie": -20,  # Floating character - moves up 20 pixels
 }
 
 # Target ground positions for team slots on the battle screen
