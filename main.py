@@ -100,6 +100,13 @@ characterTitles = {
     "ssr_scottie": "[Eternal Guardian] Scottie Jenkins"
 }
 
+# Create all character choices for autocomplete
+all_characters = rChar + srChar + ssrChar + specialChar
+character_choices = [
+    app_commands.Choice(name=characterTitles[char], value=char)
+    for char in all_characters
+]
+
 R_ABRAIZE_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1442262933018251467/R_ABRAIZE.gif?ex=692a1187&is=6928c007&hm=ea36ca7f4742ec74ad4786385624dbbbf1c69ba9c809bf2499c5b23b85f39b38&=&width=813&height=524"
 R_ABRAIZE2_GIF = "https://media.discordapp.net/attachments/796742546910871562/1444044329583640748/R_ABRAIZE_PROD.gif?ex=692b4695&is=6929f515&hm=1ecc69064ddd0b38a7b3e9be1d13e2541c99e9e7c0948619b3d486e3ac440f06&=&width=678&height=438"
 SR_ABRAIZE_GIF = "https://media.discordapp.net/attachments/907662210619289600/1441575065413091500/SR_ABRAIZ.gif?ex=69414626&is=693ff4a6&hm=c51aa1cf7872069ee96e7365b27d288de2e9cb3d9780375137cebaf6d7196d89&=&width=813&height=524"
@@ -516,43 +523,67 @@ async def inventory(ctx):
 
 # Ephemeral Message
 @bot.tree.command()
-async def char(interaction: discord.Interaction, character_name: str):
+@app_commands.choices(character_name=character_choices)
+async def char(interaction: discord.Interaction, character_name: app_commands.Choice[str]):
     """Show Character Info"""
     await interaction.response.defer(ephemeral=True)
-    # The message below will be hidden from other users.
-    all_character_names = [name.lower() for sublist in characters for name in sublist]
-    if character_name.lower() in all_character_names:
-        if character_name.lower() == "r_abraize":
-            embed = r_abraizeEmbed()
-        elif character_name.lower() == "r_abraize2":
-            embed = r_abraize2Embed()
-        elif character_name.lower() == "sr_abraize":
-            embed = sr_abraizeEmbed()
-        elif character_name.lower() == "ssr_abraize":
-            embed = ssr_abraizeEmbed()
-        elif character_name.lower() == "r_trey":
-            embed = r_treyEmbed()
-        elif character_name.lower() == "sr_trey":
-            embed = sr_treyEmbed()
-        elif character_name.lower() == "ssr_trey":
-            embed = ssr_treyEmbed()
-        elif character_name.lower() == "r_noah":
-            embed = r_noahEmbed()
-        elif character_name.lower() == "r_freeman":
-            embed = r_freemanEmbed()
-        elif character_name.lower() == "sr_freeman":
-            embed = sr_freemanEmbed()
-        elif character_name.lower() == "ssr_jayden":
-            embed = ssr_jaydenEmbed()
-        elif character_name.lower() == "r_stephen":
-            embed = r_stephenEmbed()
-        elif character_name.lower() == "sr_stephen":
-            embed = sr_stephenEmbed()
-        elif character_name.lower() == "sr_homestuck":
-            embed = sr_homestuckEmbed()
-        await interaction.followup.send(embed=embed)
+    
+    # Get the character dev name from the choice value
+    char_dev_name = character_name.value
+    
+    # Check if user owns the character
+    user_data = inventory_collection.find_one({"user_id": interaction.user.id})
+    if user_data:
+        inventory = user_data.get("inventory", {})
+        if inventory.get(char_dev_name, 0) < 1:
+            await interaction.followup.send("You do not own this character yet!")
+            return
     else:
-        await interaction.followup.send(f"Character **{character_name}** does not exist! --> Example: \"/char r_abraize\"")
+        await interaction.followup.send("No inventory data found.")
+        return
+    
+    # The message below will be hidden from other users.
+    if char_dev_name == "r_abraize":
+        embed = r_abraizeEmbed()
+    elif char_dev_name == "r_abraize2":
+        embed = r_abraize2Embed()
+    elif char_dev_name == "sr_abraize":
+        embed = sr_abraizeEmbed()
+    elif char_dev_name == "ssr_abraize":
+        embed = ssr_abraizeEmbed()
+    elif char_dev_name == "r_trey":
+        embed = r_treyEmbed()
+    elif char_dev_name == "sr_trey":
+        embed = sr_treyEmbed()
+    elif char_dev_name == "ssr_trey":
+        embed = ssr_treyEmbed()
+    elif char_dev_name == "r_noah":
+        embed = r_noahEmbed()
+    elif char_dev_name == "r_freeman":
+        embed = r_freemanEmbed()
+    elif char_dev_name == "sr_freeman":
+        embed = sr_freemanEmbed()
+    elif char_dev_name == "ssr_jayden":
+        embed = ssr_jaydenEmbed()
+    elif char_dev_name == "r_stephen":
+        embed = r_stephenEmbed()
+    elif char_dev_name == "sr_stephen":
+        embed = sr_stephenEmbed()
+    elif char_dev_name == "sr_homestuck":
+        embed = sr_homestuckEmbed()
+    elif char_dev_name == "ssr_scottie":
+        # ssr_scottie character details are not yet available
+        embed = discord.Embed(
+            title="[Eternal Guardian]",
+            description="Scottie Jenkins",
+            color=0x3f48cc
+        )
+        embed.add_field(name="Status", value="Character information coming soon!", inline=False)
+    else:
+        await interaction.followup.send(f"Character **{char_dev_name}** does not exist!")
+        return
+    
+    await interaction.followup.send(embed=embed)
 
 
 class View(discord.ui.View):
@@ -566,28 +597,39 @@ class View(discord.ui.View):
 
 #Recycle Command
 @bot.tree.command()
-async def recycle(ctx: discord.Interaction, character_name: str, amount: int):
+@app_commands.choices(character_name=character_choices)
+async def recycle(ctx: discord.Interaction, character_name: app_commands.Choice[str], amount: int):
     # SSR = 100 points to counter, SR = 5 points to counter, R = 1 point to counter
     # 10 r's for 1 roll, 2 sr for 2 rolls and 1 ssr for 10 rolls
     # if counter = 10 inside mongodb per user then give 1 roll otherwise update and tell user to recycle more
     """Recycle Characters for Rolls"""
     # Example: /recycle r_abraize 10
     # then show embed saying "Would you like to recycle" [character_name] x [amount], "you will gain [calculated rolls] rolls" (calculated rolls may be in decimal format for example if they recycle 15 r's then it will say 1.5 rolls)
+    
+    # Get the character dev name from the choice value
+    char_dev_name = character_name.value
+    char_title = character_name.name
+    
     user_data = inventory_collection.find_one({"user_id": ctx.user.id})
     if user_data:
         inventory = user_data.get("inventory", {})
-        char_count = inventory.get(character_name, 0)
+        char_count = inventory.get(char_dev_name, 0)
+        
+        # Check if user owns the character
+        if char_count < 1:
+            await ctx.response.send_message("You do not own this character yet!")
+            return
 
         if char_count >= amount:
             # Determine points based on character rarity
-            if character_name in ssrChar:
+            if char_dev_name in ssrChar:
                 points = 100 * amount
-            elif character_name in srChar:
+            elif char_dev_name in srChar:
                 points = 5 * amount
-            elif character_name in rChar:
+            elif char_dev_name in rChar:
                 points = 1 * amount
             else:
-                await ctx.response.send_message(f"Character **{character_name}** does not exist!")
+                await ctx.response.send_message(f"Character **{char_title}** does not exist!")
                 return
 
             # Calculate rolls to add
@@ -597,7 +639,7 @@ async def recycle(ctx: discord.Interaction, character_name: str, amount: int):
             rolls_to_add = total_points // 10  # 10 points = 1 roll
 
             # embed awaiting user confirmation by button click yes or no to recycle or not
-            embed = discord.Embed(title=f"Would you like to recycle {character_name} x {amount}? ", color=0x3f48cc)
+            embed = discord.Embed(title=f"Would you like to recycle {char_title} x {amount}? ", color=0x3f48cc)
             await ctx.response.send_message(embed=embed, view=View())
 
             # if view is custom id of yes button then proceed with recycling
@@ -619,7 +661,7 @@ async def recycle(ctx: discord.Interaction, character_name: str, amount: int):
                         {"user_id": ctx.user.id},
                         {
                             "$inc": {
-                                f"inventory.{character_name}": -amount,
+                                f"inventory.{char_dev_name}": -amount,
                                 "rolls": rolls_gain
                             },
                             "$set": {
@@ -631,16 +673,16 @@ async def recycle(ctx: discord.Interaction, character_name: str, amount: int):
                     # if character count goes to 0 then remove character from inventory
                     updated_user_data = inventory_collection.find_one({"user_id": ctx.user.id})
                     updated_inventory = updated_user_data.get("inventory", {})
-                    if updated_inventory.get(character_name, 0) == 0:
+                    if updated_inventory.get(char_dev_name, 0) == 0:
                         inventory_collection.update_one(
                             {"user_id": ctx.user.id},
-                            {"$unset": {f"inventory.{character_name}": ""}}
+                            {"$unset": {f"inventory.{char_dev_name}": ""}}
                         )
                    # user_data = inventory_collection.find_one({"user_id": ctx.user.id})
 
 
                   #  if rolls_to_add == 0:
-                    await ctx.followup.send(f"Recycled **{character_name} x{amount}**. Your total rolls is **{rolls_gain + user_data.get('rolls', 0)}** rolls.")
+                    await ctx.followup.send(f"Recycled **{char_title} x{amount}**. Your total rolls is **{rolls_gain + user_data.get('rolls', 0)}** rolls.")
                 #    else:
                  #       await ctx.followup.send(f"Recycled **{character_name} x{amount}** for **{rolls_to_add}** rolls!, Your total rolls is **x{user_data.get('rolls', 0) + rolls_to_add}** rolls.")
                 else:  # no_button pressed
@@ -650,13 +692,7 @@ async def recycle(ctx: discord.Interaction, character_name: str, amount: int):
 
 
         else:
-            #if character does not exist:
-            all_chars = rChar + srChar + ssrChar
-            if character_name not in all_chars:
-                await ctx.response.send_message(f"Character **{character_name}** does not exist!")
-                return
-            else:
-              await ctx.response.send_message(f"You do not have enough **{character_name}'s** to recycle **x{amount}**. You currently have **x{char_count}**.")
+            await ctx.response.send_message(f"You do not have enough **{char_title}'s** to recycle **x{amount}**. You currently have **x{char_count}**.")
     else:
         await ctx.response.send_message(f"{ctx.user.mention} No inventory data found. Please contact an Admin immediately.")
 
@@ -681,20 +717,23 @@ async def viewteam(ctx: discord.Interaction):
 
 # there cannot be 2 of the same character for example /team r_abraize r_abraize r_noah r_freeman is invalid and /team r_abraize sr_abraize r_noah r_freeman is invalid
 @bot.tree.command()
-async def team(ctx: discord.Interaction, char1: str = None, char2: str = None, char3: str = None, char4: str = None):
+@app_commands.choices(
+    char1=character_choices,
+    char2=character_choices,
+    char3=character_choices,
+    char4=character_choices
+)
+async def team(ctx: discord.Interaction, char1: app_commands.Choice[str] = None, char2: app_commands.Choice[str] = None, char3: app_commands.Choice[str] = None, char4: app_commands.Choice[str] = None):
     """Set your Team of maximum 4 Characters"""
-    team_chars = [c for c in [char1, char2, char3, char4] if c]
+    team_choices = [c for c in [char1, char2, char3, char4] if c]
 
-    if not team_chars:
+    if not team_choices:
         await ctx.response.send_message("Please provide at least one character to add to your team.")
         return
 
-    # Validate characters
-    all_character_names = [name.lower() for sublist in characters for name in sublist]
-    for char in team_chars:
-        if char.lower() not in all_character_names:
-            await ctx.response.send_message(f"Character **{char}** does not exist! Please try again")
-            return
+    # Convert choices to dev names
+    team_chars = [c.value for c in team_choices]
+    team_titles = [c.name for c in team_choices]
 
     # Check for duplicates
     if len(team_chars) != len(set(team_chars)):
@@ -715,9 +754,9 @@ async def team(ctx: discord.Interaction, char1: str = None, char2: str = None, c
     user_data = inventory_collection.find_one({"user_id": ctx.user.id})
     if user_data:
         inventory = user_data.get("inventory", {})
-        for char in team_chars:
+        for i, char in enumerate(team_chars):
             if inventory.get(char, 0) < 1:
-                await ctx.response.send_message(f"You do not own character **{char}**! Please try again")
+                await ctx.response.send_message(f"You do not own this character yet! **{team_titles[i]}**")
                 return
 
     # Update team in database
@@ -727,7 +766,6 @@ async def team(ctx: discord.Interaction, char1: str = None, char2: str = None, c
     )
 
     # show titles of characters in team
-    team_titles = [characterTitles.get(char, char) for char in team_chars]
     await ctx.response.send_message("Team Updated Successfully! Your team order is:\n" + "\n".join(team_titles))
 
 # Battle Command - PvE
