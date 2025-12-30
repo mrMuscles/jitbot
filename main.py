@@ -100,9 +100,6 @@ characterTitles = {
     "ssr_scottie": "[Eternal Guardian] Scottie Jenkins"
 }
 
-# Reverse mapping from titles to developer names
-titleToCharacter = {v: k for k, v in characterTitles.items()}
-
 # Create all character choices for autocomplete
 all_characters = rChar + srChar + ssrChar + specialChar
 character_choices = [
@@ -575,9 +572,13 @@ async def char(interaction: discord.Interaction, character_name: app_commands.Ch
     elif char_dev_name == "sr_homestuck":
         embed = sr_homestuckEmbed()
     elif char_dev_name == "ssr_scottie":
-        # ssr_scottie doesn't have an embed function yet
-        await interaction.followup.send(f"Character information for **{character_name.name}** is not yet available!")
-        return
+        # ssr_scottie character details are not yet available
+        embed = discord.Embed(
+            title="[Eternal Guardian]",
+            description="Scottie Jenkins",
+            color=0x3f48cc
+        )
+        embed.add_field(name="Status", value="Character information coming soon!", inline=False)
     else:
         await interaction.followup.send(f"Character **{char_dev_name}** does not exist!")
         return
