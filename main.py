@@ -7,6 +7,8 @@ from pymongo import MongoClient
 import random
 from collections import Counter
 from PIL import Image
+from dotenv import load_dotenv
+load_dotenv("token.env")
 
 MONGO_URI = "mongodb://localhost:27017"
 DB_NAME = "jitstuck"
@@ -22,7 +24,6 @@ inventory_collection = db[COLLECTION_NAME]
 
 # Put your bot token in the DISCORD_TOKEN environment variable
 TOKEN = os.getenv("DISCORD_TOKEN")
-TOKEN = ""
 
 if not TOKEN:
     raise RuntimeError("DISCORD_TOKEN environment variable not set")
