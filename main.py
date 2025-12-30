@@ -1,0 +1,809 @@
+import asyncio
+import os
+import discord
+from discord.ext import commands
+from discord import app_commands
+from pymongo import MongoClient
+import random
+from collections import Counter
+from PIL import Image
+
+MONGO_URI = "mongodb://localhost:27017"
+DB_NAME = "jitstuck"
+COLLECTION_NAME = "inventory"
+
+# Mongo Uses DBS called "jitstuck" and assumes a collection called "inventory"
+
+client = MongoClient(MONGO_URI)
+db = client[DB_NAME]
+inventory_collection = db[COLLECTION_NAME]
+
+# main.py - basic discord.py bot that goes online
+
+# Put your bot token in the DISCORD_TOKEN environment variable
+TOKEN = os.getenv("DISCORD_TOKEN")
+TOKEN = ""
+
+if not TOKEN:
+    raise RuntimeError("DISCORD_TOKEN environment variable not set")
+
+intents = discord.Intents.default()
+intents.message_content = True  # enable if you want text commands (enable in dev portal if required)
+intents.members = True
+
+bot = commands.Bot(command_prefix="/", intents=intents, help_command=None)
+
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})")
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="Gacha Game"))
+    print("teeesst")
+
+    # Add all users from all guilds to MongoDB
+    for guild in bot.guilds:
+        for member in guild.members:
+            #print("Checking user:", member.name)
+            if not member.bot:  # Skip bots
+                print("User: " + member.name)
+                user_data = {
+                    "user_id": member.id,
+                    "username": str(member),
+                    "inventory": {},
+                    "rolls": 10,  # Starting rolls,
+                    "counter": 0,
+                    "team": []
+                }
+                # Use upsert to avoid duplicates
+                inventory_collection.update_one(
+                    {"user_id": member.id},
+                    {"$setOnInsert": user_data},
+                    upsert=True
+                )
+    print(f"Initialized users in database from {len(bot.guilds)} guild(s)")
+
+
+# Roll, inventory, Character, battle, challenge, team, viewteam, recycle, help
+'''
+abraizeChar = ["r_abraize", "r_abraize2", "sr_abraize", "ssr_abraize"]
+treyChar = ["r_trey", "ssr_trey"]
+noahChar = ["r_noah"]
+freemanChar = ["r_freeman", "sr_freeman"]
+stephenChar = ["r_stephen", "sr_stephen"]
+jaydenChar = ["ssr_jayden"]
+homestuckChar = ["sr_homestuck"]
+scottieChar = ["ssr_scottie"]
+'''
+
+rChar = ["r_abraize", "r_abraize2", "r_trey", "r_noah", "r_freeman", "r_stephen"]
+srChar = ["sr_freeman", "sr_stephen", "sr_homestuck", "sr_abraize", "sr_trey"]
+ssrChar = ["ssr_abraize", "ssr_trey", "ssr_jayden"]
+specialChar = ["ssr_scottie"]
+
+characters = [rChar, srChar, ssrChar]
+
+characterTitles = {
+    "r_abraize": "[Rolling in Success] Abraize Masood",
+    "r_abraize2": "[Productivity Time] Abraize Masood",
+    "sr_abraize": "[Time on my Side] Abraize Masood",
+    "ssr_abraize": "[Rewind] Abraize Masood",
+    "r_trey": "[Irish Golden Standard] Treyvaughn Lewis",
+    "sr_trey": "[Heavy Sleeper] Treyvaughn Lewis",
+    "ssr_trey": "[Seeker of Silence] Treyvaughn Lewis",
+    "r_noah": "[pillagingPirate] Noah Cave",
+    "r_freeman": "[Who I am to Me] Freeman",
+    "sr_freeman": "[Freedom in Jeopardy] Freeman",
+    "r_stephen": "[You Marlowe?] Stephen Goraynov",
+    "sr_stephen": "[Master of Intervention] Stephen Goraynov",
+    "ssr_jayden": "[Sworn Protectorate of Creation] Jayden Ceballos",
+    "sr_homestuck": "[Thief in God's Clothing] Homestuck",
+    "ssr_scottie": "[Eternal Guardian] Scottie Jenkins"
+}
+
+R_ABRAIZE_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1442262933018251467/R_ABRAIZE.gif?ex=692a1187&is=6928c007&hm=ea36ca7f4742ec74ad4786385624dbbbf1c69ba9c809bf2499c5b23b85f39b38&=&width=813&height=524"
+R_ABRAIZE2_GIF = "https://media.discordapp.net/attachments/796742546910871562/1444044329583640748/R_ABRAIZE_PROD.gif?ex=692b4695&is=6929f515&hm=1ecc69064ddd0b38a7b3e9be1d13e2541c99e9e7c0948619b3d486e3ac440f06&=&width=678&height=438"
+SR_ABRAIZE_GIF = "https://media.discordapp.net/attachments/907662210619289600/1441575065413091500/SR_ABRAIZ.gif?ex=69414626&is=693ff4a6&hm=c51aa1cf7872069ee96e7365b27d288de2e9cb3d9780375137cebaf6d7196d89&=&width=813&height=524"
+SSR_ABRAIZE_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1438298174707204228/SSR_ABRAIZ.gif?ex=692ace4f&is=69297ccf&hm=3b1b6057fd711499f026538c8f3d4bb308a4ef17e6e827dfd4a22cc43cae43ff&=&width=813&height=524"
+R_TREY_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1442262950055251978/R_TREY.gif?ex=692aba4b&is=692968cb&hm=6467f2663cac2d80ffd3f61f9de3436133557568e4b00cec63ee4cbdb1d6da40&=&width=813&height=524"
+SR_TREY_GIF = "https://media.discordapp.net/attachments/907662210619289600/1442648569579307180/SR_TREY.gif?ex=6941396e&is=693fe7ee&hm=d12a52705f4952d3860d273dcce43f3598f971d5d581209f61fd46108823194d&=&width=813&height=524"
+SSR_TREY_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1438298186409185393/SSR_TREY.gif?ex=692ace51&is=69297cd1&hm=705ffe6482d8c46a88742a82e6565c28ff53cbba9ea15eebe990dfacde708469&=&width=813&height=524"
+R_NOAH_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1438298195829719193/R_NOAH.gif?ex=692ace54&is=69297cd4&hm=a4ab137787708b382bd26b0659a39b768dece0b7d0eb03898b4fe4b180428133&=&width=601&height=438"
+R_FREEMAN_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1442262942660952268/R_FREEMAN.gif?ex=692aba49&is=692968c9&hm=3f1edc05a01b0c793ab7ddfe3519054630c1523e68b5c29ec5d4be6624d0e1c0&=&width=813&height=524"
+SR_FREEMAN_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1438298206193586187/SR_FREEMAN.gif?ex=692ace56&is=69297cd6&hm=6e42e1d45a353ffc60916f54593933273fea88e2d69d400c91f8c6899172174e&=&width=678&height=438"
+R_STEPHEN_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1443821437378105444/R_STEPHEN.gif?ex=692b1fbf&is=6929ce3f&hm=97986106339c3febd0bb243c25c13f870c331eb2376c2b3bcefc053fac64e26b&=&width=813&height=524"
+SR_STEPHEN_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1443821457846046741/SR_STEPHEN.gif?ex=692b1fc4&is=6929ce44&hm=fbccf7579c4c5189be6d18689bc65a7e62b064bdd075647ddc64428721d53b3e&=&width=813&height=524"
+SSR_JAYDEN_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1441662516672331836/SSR_JAYDEN.gif?ex=692a8558&is=692933d8&hm=c5f5376d3603ce635598548977465872e7a3662802986c6f742c1f590eadd7a4&=&width=813&height=524"
+SR_HOMESTUCK_GIF = "https://media.discordapp.net/attachments/907662210619289600/1441689825911505026/SR_HOMESTUCK.gif?ex=6941b107&is=69405f87&hm=181544c05734a721ea53bbe630dcb4b25ed7b95327661a807b97bdba81cc7506&=&width=813&height=524"
+
+
+# Use abraizeEmbed as example for other characters
+# HP attack and defense are integers
+# evasion and accuracy are percentages
+
+# each character will have an 8 length array that includes all attributes
+# hp, atk, def, eva, acc, skill1, skill2, skill3
+# the only exxception is that ssr characters will have an ultimate skill making it a 9 length array
+
+r_abraizeAttributes = [200, 10, 10, "3%", "90%", "Punch", "Sleep", "Missing Assignments"]
+def r_abraizeEmbed():
+    embed = discord.Embed(title=f"[Rolling in Success]", description="Abraize Masood", color=0x3f48cc)
+    embed.set_image(url=R_ABRAIZE_GIF)
+    embed.add_field(name="HP:", value=r_abraizeAttributes[0], inline=True)
+    embed.add_field(name="ATK:", value=r_abraizeAttributes[1], inline=True)
+    embed.add_field(name="DEF:", value=r_abraizeAttributes[2], inline=True)
+    embed.add_field(name="EVA:", value=r_abraizeAttributes[3], inline=True)
+    embed.add_field(name="ACC:", value=r_abraizeAttributes[4], inline=True)
+    embed.add_field(name=r_abraizeAttributes[5], value="Throws a mean right hook at the enemy.", inline=False)
+    embed.add_field(name=r_abraizeAttributes[6], value="Take a nap on the field, reducing self’s evasion score to 0%. \nFor one turn, unable to attack or act. After said turn, gain a 15% atk and def buff to self for 2 turns.", inline=False)
+    embed.add_field(name=r_abraizeAttributes[7], value="Getting these done really lifted a weight off your chest. +5% acc boost for one turn.", inline=False)
+    return embed
+
+r_abraize2Attributes = [200, 10, 10, "3%", "90%", "Punch", "Eat Note", "Productivity Time"]
+def r_abraize2Embed():
+    embed = discord.Embed(title=f"[Productivity Time]", description="Abraize Masood", color=0x3f48cc)
+    embed.set_image(url=R_ABRAIZE2_GIF)
+    embed.add_field(name="HP:", value=r_abraize2Attributes[0], inline=True)
+    embed.add_field(name="ATK:", value=r_abraize2Attributes[1], inline=True)
+    embed.add_field(name="DEF:", value=r_abraize2Attributes[2], inline=True)
+    embed.add_field(name="EVA:", value=r_abraize2Attributes[3], inline=True)
+    embed.add_field(name="ACC:", value=r_abraize2Attributes[4], inline=True)
+    embed.add_field(name=r_abraize2Attributes[5], value="Throws a mean right hook at the enemy.", inline=False)
+    embed.add_field(name=r_abraize2Attributes[6], value="Apply a +10% evasion buff to self for one turn, but cost 25 HP.", inline=False)
+    embed.add_field(name=r_abraize2Attributes[7], value="Apply a 10% atk and def buff to all allies for 3 turns, cannot be used for 4 turns.", inline=False)
+    return embed
+
+sr_abraizeAttributes = [200, 15, 20, "3%", "90%", "Punch", "Slow", "Attempt"]
+def sr_abraizeEmbed():
+    embed = discord.Embed(title=f"[Time on my Side]", description="Abraize Masood", color=0x3f48cc)
+    embed.set_image(url=SR_ABRAIZE_GIF)
+    embed.add_field(name="HP:", value=sr_abraizeAttributes[0], inline=True)
+    embed.add_field(name="ATK:", value=sr_abraizeAttributes[1], inline=True)
+    embed.add_field(name="DEF:", value=sr_abraizeAttributes[2], inline=True)
+    embed.add_field(name="EVA:", value=sr_abraizeAttributes[3], inline=True)
+    embed.add_field(name="ACC:", value=sr_abraizeAttributes[4], inline=True)
+    embed.add_field(name=sr_abraizeAttributes[5], value="Throws a mean right hook at the enemy.", inline=False)
+    embed.add_field(name=sr_abraizeAttributes[6], value="Applies a -15% accuracy debuff to one enemy.", inline=False)
+    embed.add_field(name=sr_abraizeAttributes[7], value="Attempt to travel back in time without being doomed. Has an 85% chance of doing nothing. 15% chance that health is healed by 50% and all allies atk is buffed by 20% for one turn.", inline=False)
+    return embed
+
+ssr_abraizeAttributes = [600, 35, 35, "3%", "90%", "Accelerated Punch", "Fast Forward", "Rewind", "Universal Stabilizer"]
+def ssr_abraizeEmbed():
+    embed = discord.Embed(title="[Rewind]", description="Abraize Masood", color=0x3f48cc)
+    embed.set_image(url=SSR_ABRAIZE_GIF)
+    embed.add_field(name="HP:", value=ssr_abraizeAttributes[0], inline=True)
+    embed.add_field(name="ATK:", value=ssr_abraizeAttributes[1], inline=True)
+    embed.add_field(name="DEF:", value=ssr_abraizeAttributes[2], inline=True)
+    embed.add_field(name="EVA:", value=ssr_abraizeAttributes[3], inline=True)
+    embed.add_field(name="ACC:", value=ssr_abraizeAttributes[4], inline=True)
+    embed.add_field(name=ssr_abraizeAttributes[5], value="Accelerate yourself to punch the opponent. Guaranteed to hit. Applies one stack of “Accelerated” state to self. Gain +10% atk for every consecutive “Accelerated” state with a maximum of +100% atk. All “Accelerated” stacks are removed when using another move.", inline=False)
+    embed.add_field(name=ssr_abraizeAttributes[6], value="Apply a +5% acc bonus, +40% atk bonus, and +15% def bonus to all allies for one turn and allows you to immediately take another turn. Cannot be used for another 5 turns.", inline=False)
+    embed.add_field(name=ssr_abraizeAttributes[7], value="Revert all party member's stats to the state they were in during the prior turn. Cannot be used for another 2 turns.", inline=False)
+    embed.add_field(name=ssr_abraizeAttributes[8], value="Your status as an anchor of time and your experience lends you well to combat. Turn back the wheels of time to make everything right again. Applies debuff nullification (cannot be debuffed) and a +50% atk bonus to all allies for 5 turns. Heals all allies to full. Cannot be used again.", inline=False)
+    return embed
+
+r_treyAttributes = [250, 12, 8, "3%", "90%", "Punch", "Irish Goodbye", "Cheesy Fries"]
+def r_treyEmbed():
+    embed = discord.Embed(title=f"[Irish Golden Standard]", description="Treyvaughn Lewis", color=0x3f48cc)
+    embed.set_image(url=R_TREY_GIF)
+    embed.add_field(name="HP:", value=r_treyAttributes[0], inline=True)
+    embed.add_field(name="ATK:", value=r_treyAttributes[1], inline=True)
+    embed.add_field(name="DEF:", value=r_treyAttributes[2], inline=True)
+    embed.add_field(name="EVA:", value=r_treyAttributes[3], inline=True)
+    embed.add_field(name="ACC:", value=r_treyAttributes[4], inline=True)
+    embed.add_field(name=r_treyAttributes[5], value="Throws a mean right hook at the enemy.", inline=False)
+    embed.add_field(name=r_treyAttributes[6], value="Apply a one time +10% eva buff to self for one turn. Can be used again after 2 turns", inline=False)
+    embed.add_field(name=r_treyAttributes[7], value="Throws cheesy fries at one enemy of choice, applies Burn on them for one turn. 70% chance to hit", inline=False)
+    return embed
+
+sr_treyAttributes = [300, 15, 20, "3%", "75%", "Punch", "Drowsy", "Whispers from Beyond"]
+def sr_treyEmbed():
+    embed = discord.Embed(title=f"[Heavy Sleeper]", description="Treyvaughn Lewis", color=0x3f48cc)
+    embed.set_image(url=SR_TREY_GIF)
+    embed.add_field(name="HP:", value=sr_treyAttributes[0], inline=True)
+    embed.add_field(name="ATK:", value=sr_treyAttributes[1], inline=True)
+    embed.add_field(name="DEF:", value=sr_treyAttributes[2], inline=True)
+    embed.add_field(name="EVA:", value=sr_treyAttributes[3], inline=True)
+    embed.add_field(name="ACC:", value=sr_treyAttributes[4], inline=True)
+    embed.add_field(name=sr_treyAttributes[5], value="Throws a mean right hook at the enemy.", inline=False)
+    embed.add_field(name=sr_treyAttributes[6], value="Applies a -10% acc debuff to all opponents for one turn.", inline=False)
+    embed.add_field(name=sr_treyAttributes[7], value="The horrorterrors beckon. Give a +10% acc boost to all allies", inline=False)
+    return embed
+
+ssr_treyAttributes = [750, 30, 25, "30%", "90%", "Punch", "Cloak and Dagger", "Shroud", "Reality Sink"]
+def ssr_treyEmbed():
+    embed = discord.Embed(title=f"[Seeker of Silence]", description="Treyvaughn Lewis", color=0x3f48cc)
+    embed.set_image(url=SSR_TREY_GIF)
+
+    return embed
+
+r_noahAttributes = [180, 10, 8, "3%", "90%", "Punch", "Fiddle", "Bo"]
+def r_noahEmbed():
+    embed = discord.Embed(title=f"[pillagingPirate]", description="Noah Cave", color=0x3f48cc)
+    embed.set_image(url=R_NOAH_GIF)
+
+    return embed
+
+r_freemanAttributes = [180, 8, 8, "10%", "90%", "Slap", "Ponder", "SMASH!"]
+def r_freemanEmbed():
+    embed = discord.Embed(title=f"[Who I am to Me]", description="Freeman", color=0x3f48cc)
+    embed.set_image(url=R_FREEMAN_GIF)
+
+    return embed
+
+sr_freemanAttributes = [180, 8, 8, "10%", "90%", "Pistol Whip", "Shoot", "Hide"]
+def sr_freemanEmbed():
+    embed = discord.Embed(title=f"[Freedom in Jeopardy]", description="Freeman", color=0x3f48cc)
+    embed.set_image(url=SR_FREEMAN_GIF)
+
+    return embed
+
+r_stephenAttributes = [180, 9, 8, "3%", "90%", "Dropkick", "Light up", "Lock the fuck in"]
+def r_stephenEmbed():
+    embed = discord.Embed(title=f"[You Marlowe?]", description="Steven Goraynov", color=0x3f48cc)
+    embed.set_image(url=R_STEPHEN_GIF)
+
+    return embed
+
+sr_stephenAttributes = [180, 9, 8, "3%", "90%", "Dropkick", "Consider Intervening", "HIYAAAHHH!"]
+def sr_stephenEmbed():
+    embed = discord.Embed(title=f"[Master of Intervention]", description="Steven Goraynov", color=0x3f48cc)
+    embed.set_image(url=SR_STEPHEN_GIF)
+
+    return embed
+
+ssr_jaydenAttributes = [600, 30, 30, "5%", "90%", "Punch", "Butler of Swatabi", "Indecision", "Genesis"]
+def ssr_jaydenEmbed():
+    embed = discord.Embed(title=f"[Sworn Protectorate of Creation]", description="Jayden Ceballos", color=0x3f48cc)
+    embed.set_image(url=SSR_JAYDEN_GIF)
+
+    return embed
+
+sr_homestuckAttributes = [180, 18, 15, "5%", "90%", "Impractical Assailants", "Plunder", "Thief"]
+def sr_homestuckEmbed():
+    embed = discord.Embed(title=f"[Thief in God's Clothing]", description="Homestuck", color=0x3f48cc)
+    embed.set_image(url=SR_HOMESTUCK_GIF)
+
+    return embed
+
+def roll_character(banner: str) -> str:
+    # Define character pools by rarity
+  #  r_chars = ["r_abraize", "r_abraize2", "r_trey", "r_noah", "r_freeman", "r_stephen"]
+   # sr_chars = ["sr_freeman", "sr_stephen"]
+    #ssr_chars = ["ssr_abraize", "ssr_trey", "ssr_jayden"]
+
+    # Roll for rarity (60% R, 29% SR, 11% SSR total)
+    # Note: SSR pool has 3 chars, so each gets ~3.67% for 11% total
+    # Adjusted to 1% per SSR = 3% total, with 60% R and 37% SR
+    rarity_roll = random.random() * 100
+    if banner == "standard":
+        if rarity_roll < 1:
+            # 1% chance for SSR
+            return random.choice(ssrChar)
+        elif rarity_roll < 30:
+            # 29% chance for SR (1% to 30%)
+            return random.choice(srChar)
+        else:
+            # 70% chance for R (30% to 100%)
+            return random.choice(rChar)
+
+    if banner == "special":
+        if rarity_roll < 1:
+            return random.choice(specialChar)
+        elif rarity_roll < 30:
+            return random.choice(srChar)
+        else:
+            return random.choice(rChar)
+
+    return "Error"  # Example character
+
+
+@bot.tree.command(name="roll")
+@app_commands.choices(banner = [
+    app_commands.Choice(name="standard", value="standard"),
+    app_commands.Choice(name="special", value="special"),
+])
+async def roll(interaction: discord.Interaction, banner: app_commands.Choice[str], amount: int = None):
+    """Pick a banner of: Standard or Special. Optionally specify amount to roll; otherwise roll all available."""
+
+    if banner.name == "standard":
+        user_data = inventory_collection.find_one({"user_id": interaction.user.id})
+        if not user_data:
+            await interaction.response.send_message("No inventory data found.")
+            return
+
+        rolls_available = user_data.get("rolls", 0)
+        if rolls_available <= 0:
+            await interaction.response.send_message("You do not have any rolls left for the **Standard** banner.")
+            return
+
+        # Determine how many rolls to perform
+        if amount is None or amount <= 0:
+            to_roll = rolls_available
+        else:
+            to_roll = min(amount, rolls_available)
+
+        rolled_characters = []
+        embed = discord.Embed(title=f"Standard Rolls: x{to_roll}", color=0x3f48cc)
+        if amount is not None and amount > rolls_available:
+            embed.description = f"Requested {amount}, using {rolls_available} available."
+
+        for _ in range(to_roll):
+            rolled_character = roll_character("standard")
+            rolled_characters.append(rolled_character)
+            inventory_collection.update_one(
+                {"user_id": interaction.user.id},
+                {"$inc": {f"inventory.{rolled_character}": 1}},
+            )
+
+        # Decrement only the number of rolls used
+        inventory_collection.update_one(
+            {"user_id": interaction.user.id},
+            {"$inc": {"rolls": -to_roll}},
+        )
+
+        # Group results by rarity
+        ssr_rolled = [char for char in rolled_characters if char in ssrChar]
+        sr_rolled = [char for char in rolled_characters if char in srChar]
+        r_rolled = [char for char in rolled_characters if char in rChar]
+
+        def format_group(chars):
+            if not chars:
+                return None
+            counts = Counter(chars)
+            lines = []
+            for char, cnt in counts.items():
+                title = characterTitles.get(char, char)
+                lines.append(f"**{title}** +{cnt}")
+            return "\n".join(lines)
+
+        ssr_text = format_group(ssr_rolled)
+        sr_text = format_group(sr_rolled)
+        r_text = format_group(r_rolled)
+
+        if ssr_text:
+            embed.add_field(name="SSR Characters:", value=ssr_text, inline=False)
+        if sr_text:
+            embed.add_field(name="SR Characters:", value=sr_text, inline=False)
+        if r_text:
+            embed.add_field(name="R Characters:", value=r_text, inline=False)
+
+        await interaction.response.send_message(embed=embed)
+
+    elif banner.name == "special":
+        # Special banner logic
+        user_data = inventory_collection.find_one({"user_id": interaction.user.id})
+        if not user_data:
+            await interaction.response.send_message("No inventory data found.")
+            return
+        rolls_available = user_data.get("rolls", 0)
+        if rolls_available <= 0:
+            await interaction.response.send_message("You do not have any rolls left for the **Special** banner.")
+            return
+        # swtich SSR with specialChar
+        if amount is None or amount <= 0:
+            to_roll = rolls_available
+        else:
+            to_roll = min(amount, rolls_available)
+        rolled_characters = []
+        embed = discord.Embed(title=f"Special Rolls: x{to_roll}", color=0x3f48cc)
+        if amount is not None and amount > rolls_available:
+            embed.description = f"Requested {amount}, using {rolls_available} available."
+        for _ in range(to_roll):
+            rolled_character = roll_character("special")
+            rolled_characters.append(rolled_character)
+            inventory_collection.update_one(
+                {"user_id": interaction.user.id},
+                {"$inc": {f"inventory.{rolled_character}": 1}},
+            )
+        # Decrement only the number of rolls used
+        inventory_collection.update_one(
+            {"user_id": interaction.user.id},
+            {"$inc": {"rolls": -to_roll}},
+        )
+        # Group results by rarity
+        special_rolled = [char for char in rolled_characters if char in specialChar]
+        sr_rolled = [char for char in rolled_characters if char in srChar]
+        r_rolled = [char for char in rolled_characters if char in rChar]
+        def format_group(chars):
+            if not chars:
+                return None
+            counts = Counter(chars)
+            lines = []
+            for char, cnt in counts.items():
+                title = characterTitles.get(char, char)
+                lines.append(f"**{title}** +{cnt}")
+            return "\n".join(lines)
+        special_text = format_group(special_rolled)
+        sr_text = format_group(sr_rolled)
+        r_text = format_group(r_rolled)
+        if special_text:
+            embed.add_field(name="Special Characters:", value=special_text, inline=False)
+        if sr_text:
+            embed.add_field(name="SR Characters:", value=sr_text, inline=False)
+        if r_text:
+            embed.add_field(name="R Characters:", value=r_text, inline=False)
+
+        await interaction.response.send_message(embed=embed)
+    else:
+        await interaction.response.send_message("Please select a Banner to roll from!")
+
+@bot.tree.command()
+async def inventory(ctx):
+    """Show Inventory"""
+    # display inventory in some cool way maybe like how maki does and have buttons to flip through pages
+    user_data = inventory_collection.find_one({"user_id": ctx.user.id})
+    if user_data:
+        rolls = user_data.get("rolls", 0)
+        inventory = user_data.get("inventory", {})
+
+        ssr_inventory = {char: count for char, count in inventory.items() if char in ssrChar}
+        sr_inventory = {char: count for char, count in inventory.items() if char in srChar}
+        r_inventory = {char: count for char, count in inventory.items() if char in rChar}
+
+        embed = discord.Embed(title=f"{ctx.user.display_name}'s Inventory", color=0x3f48cc)
+
+        if ssr_inventory:
+            embed.add_field(name="SSR Characters:", value="\n".join([f"{characterTitles[char]}: {count}" for char, count in ssr_inventory.items()]), inline=False)
+        if sr_inventory:
+            embed.add_field(name="SR Characters:", value="\n".join([f"{characterTitles[char]}: {count}" for char, count in sr_inventory.items()]), inline=False)
+        if r_inventory:
+            embed.add_field(name="R Characters:", value="\n".join([f"{characterTitles[char]}: {count}" for char, count in r_inventory.items()]), inline=False)
+
+        embed.add_field(name="Rolls:", value=str(rolls), inline=False)
+        embed.add_field(name="Points Needed for Next Roll:", value=str(10 - user_data.get("counter", 0)), inline=False)
+
+        await ctx.response.send_message(embed=embed)
+    else:
+        await ctx.response.send_message(f"{ctx.user.mention} No inventory data found.")
+
+# Ephemeral Message
+@bot.tree.command()
+async def char(interaction: discord.Interaction, character_name: str):
+    """Show Character Info"""
+    await interaction.response.defer(ephemeral=True)
+    # The message below will be hidden from other users.
+    all_character_names = [name.lower() for sublist in characters for name in sublist]
+    if character_name.lower() in all_character_names:
+        if character_name.lower() == "r_abraize":
+            embed = r_abraizeEmbed()
+        elif character_name.lower() == "r_abraize2":
+            embed = r_abraize2Embed()
+        elif character_name.lower() == "sr_abraize":
+            embed = sr_abraizeEmbed()
+        elif character_name.lower() == "ssr_abraize":
+            embed = ssr_abraizeEmbed()
+        elif character_name.lower() == "r_trey":
+            embed = r_treyEmbed()
+        elif character_name.lower() == "sr_trey":
+            embed = sr_treyEmbed()
+        elif character_name.lower() == "ssr_trey":
+            embed = ssr_treyEmbed()
+        elif character_name.lower() == "r_noah":
+            embed = r_noahEmbed()
+        elif character_name.lower() == "r_freeman":
+            embed = r_freemanEmbed()
+        elif character_name.lower() == "sr_freeman":
+            embed = sr_freemanEmbed()
+        elif character_name.lower() == "ssr_jayden":
+            embed = ssr_jaydenEmbed()
+        elif character_name.lower() == "r_stephen":
+            embed = r_stephenEmbed()
+        elif character_name.lower() == "sr_stephen":
+            embed = sr_stephenEmbed()
+        elif character_name.lower() == "sr_homestuck":
+            embed = sr_homestuckEmbed()
+        await interaction.followup.send(embed=embed)
+    else:
+        await interaction.followup.send(f"Character **{character_name}** does not exist! --> Example: \"/char r_abraize\"")
+
+
+class View(discord.ui.View):
+    @discord.ui.button(label="Yes", style=discord.ButtonStyle.green, custom_id="yes_button", emoji="♻️")
+    async def yes_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
+    @discord.ui.button(label="No", style=discord.ButtonStyle.red, custom_id="no_button", emoji="🥺")
+    async def no_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
+#Recycle Command
+@bot.tree.command()
+async def recycle(ctx: discord.Interaction, character_name: str, amount: int):
+    # SSR = 100 points to counter, SR = 5 points to counter, R = 1 point to counter
+    # 10 r's for 1 roll, 2 sr for 2 rolls and 1 ssr for 10 rolls
+    # if counter = 10 inside mongodb per user then give 1 roll otherwise update and tell user to recycle more
+    """Recycle Characters for Rolls"""
+    # Example: /recycle r_abraize 10
+    # then show embed saying "Would you like to recycle" [character_name] x [amount], "you will gain [calculated rolls] rolls" (calculated rolls may be in decimal format for example if they recycle 15 r's then it will say 1.5 rolls)
+    user_data = inventory_collection.find_one({"user_id": ctx.user.id})
+    if user_data:
+        inventory = user_data.get("inventory", {})
+        char_count = inventory.get(character_name, 0)
+
+        if char_count >= amount:
+            # Determine points based on character rarity
+            if character_name in ssrChar:
+                points = 100 * amount
+            elif character_name in srChar:
+                points = 5 * amount
+            elif character_name in rChar:
+                points = 1 * amount
+            else:
+                await ctx.response.send_message(f"Character **{character_name}** does not exist!")
+                return
+
+            # Calculate rolls to add
+            # rolls to add must be integer never float
+            current_points = user_data.get("counter", 0)
+            total_points = current_points + points
+            rolls_to_add = total_points // 10  # 10 points = 1 roll
+
+            # embed awaiting user confirmation by button click yes or no to recycle or not
+            embed = discord.Embed(title=f"Would you like to recycle {character_name} x {amount}? ", color=0x3f48cc)
+            await ctx.response.send_message(embed=embed, view=View())
+
+            # if view is custom id of yes button then proceed with recycling
+            def check(interaction: discord.Interaction):
+                return interaction.user.id == ctx.user.id and interaction.data["custom_id"] in ["yes_button", "no_button"]
+            try:
+                interaction = await bot.wait_for("interaction", check=check, timeout=10.0)
+
+                if interaction.data["custom_id"] == "yes_button":
+                    # Proceed with recycling
+                    # Counter examples: if points = 20 then add 2 rolls and counter = 0, if points = 15 then add 1 roll and counter = 5, if points = 7 then add 0 rolls and counter = 7
+                    # if points = 5 and they recycled 1 sr which is 5 points then add 1 roll and set coutner to 0
+                    # Remove full tens from the counter and convert them into rolls
+                    new_total = current_points + points
+                    rolls_gain = new_total // 10
+                    new_counter = new_total % 10
+
+                    inventory_collection.update_one(
+                        {"user_id": ctx.user.id},
+                        {
+                            "$inc": {
+                                f"inventory.{character_name}": -amount,
+                                "rolls": rolls_gain
+                            },
+                            "$set": {
+                                "counter": new_counter
+                            }
+                        }
+                    )
+
+                    # if character count goes to 0 then remove character from inventory
+                    updated_user_data = inventory_collection.find_one({"user_id": ctx.user.id})
+                    updated_inventory = updated_user_data.get("inventory", {})
+                    if updated_inventory.get(character_name, 0) == 0:
+                        inventory_collection.update_one(
+                            {"user_id": ctx.user.id},
+                            {"$unset": {f"inventory.{character_name}": ""}}
+                        )
+                   # user_data = inventory_collection.find_one({"user_id": ctx.user.id})
+
+
+                  #  if rolls_to_add == 0:
+                    await ctx.followup.send(f"Recycled **{character_name} x{amount}**. Your total rolls is **{rolls_gain + user_data.get('rolls', 0)}** rolls.")
+                #    else:
+                 #       await ctx.followup.send(f"Recycled **{character_name} x{amount}** for **{rolls_to_add}** rolls!, Your total rolls is **x{user_data.get('rolls', 0) + rolls_to_add}** rolls.")
+                else:  # no_button pressed
+                    await ctx.followup.send("Recycling cancelled.")
+            except asyncio.TimeoutError:
+                await ctx.followup.send("Recycling timed out. Please try again.")
+
+
+        else:
+            #if character does not exist:
+            all_chars = rChar + srChar + ssrChar
+            if character_name not in all_chars:
+                await ctx.response.send_message(f"Character **{character_name}** does not exist!")
+                return
+            else:
+              await ctx.response.send_message(f"You do not have enough **{character_name}'s** to recycle **x{amount}**. You currently have **x{char_count}**.")
+    else:
+        await ctx.response.send_message(f"{ctx.user.mention} No inventory data found. Please contact an Admin immediately.")
+
+@bot.tree.command()
+async def viewteam(ctx: discord.Interaction):
+    """View your Team of maximum 4 Characters"""
+    user_data = inventory_collection.find_one({"user_id": ctx.user.id})
+    if user_data:
+        team = user_data.get("team", [])
+        if team:
+            embed = discord.Embed(title=f"{ctx.user.display_name}'s Team", color=0x3f48cc)
+            team_titles = [characterTitles.get(char, char) for char in team]
+            for i, title in enumerate(team_titles, 1):
+                embed.add_field(name=f"Slot {i}", value=title, inline=False)
+            await ctx.response.send_message(embed=embed)
+        else:
+            embed = discord.Embed(title="No Team Set", description="You have not set a team yet. Use the /team command to set your team of 4 characters.", color=0x3f48cc)
+            await ctx.response.send_message(embed=embed)
+    else:
+        embed = discord.Embed(title="Error", description=f"{ctx.user.mention} No inventory data found.", color=0xff0000)
+        await ctx.response.send_message(embed=embed)
+
+# there cannot be 2 of the same character for example /team r_abraize r_abraize r_noah r_freeman is invalid and /team r_abraize sr_abraize r_noah r_freeman is invalid
+@bot.tree.command()
+async def team(ctx: discord.Interaction, char1: str = None, char2: str = None, char3: str = None, char4: str = None):
+    """Set your Team of maximum 4 Characters"""
+    team_chars = [c for c in [char1, char2, char3, char4] if c]
+
+    if not team_chars:
+        await ctx.response.send_message("Please provide at least one character to add to your team.")
+        return
+
+    # Validate characters
+    all_character_names = [name.lower() for sublist in characters for name in sublist]
+    for char in team_chars:
+        if char.lower() not in all_character_names:
+            await ctx.response.send_message(f"Character **{char}** does not exist! Please try again")
+            return
+
+    # Check for duplicates
+    if len(team_chars) != len(set(team_chars)):
+        await ctx.response.send_message("You cannot have duplicate characters in your team!")
+        return
+
+    # cannot have 2 versions of the same character for example r_abraize and ssr_abraize
+    base_names = set()
+    for char in team_chars:
+        parts = char.split('_', 1)
+        base_name = parts[1] if len(parts) > 1 else char
+        if base_name in base_names:
+            await ctx.response.send_message(f"You cannot have multiple versions of the same character in your team! **({base_name})**")
+            return
+        base_names.add(base_name)
+
+    # Check if user owns the characters
+    user_data = inventory_collection.find_one({"user_id": ctx.user.id})
+    if user_data:
+        inventory = user_data.get("inventory", {})
+        for char in team_chars:
+            if inventory.get(char, 0) < 1:
+                await ctx.response.send_message(f"You do not own character **{char}**! Please try again")
+                return
+
+    # Update team in database
+    inventory_collection.update_one(
+        {"user_id": ctx.user.id},
+        {"$set": {"team": team_chars}}
+    )
+
+    # show titles of characters in team
+    team_titles = [characterTitles.get(char, char) for char in team_chars]
+    await ctx.response.send_message("Team Updated Successfully! Your team order is:\n" + "\n".join(team_titles))
+
+# Battle Command - PvE
+# The battle screen has 8 total slots, 4 for the player's team and 4 for the enemy team (enemy team does not have to fill all 4 slots)
+# There are multiple enemy types to fight
+# Currently: Ruffian, Grunt, Spearman, Agent
+# There will be multiple backgrounds to choose from but currently will be randomly decided
+# Using Pillow (PIL) we will create a battle screen image that shows the player's team on the right and the enemy team on the left with background
+backgrounds = {
+    "purple": "./purple.png"
+}
+characterImages ={
+    "r_freeman": "./r_freeman.png",
+    "r_noah": "./r_noah.png",
+    "r_stephen": "./r_stephen.png",
+    "ssr_abraize": "./ssr_abraize.png"
+}
+enemyImages = {
+    "RuffianBack": "./ruffianBack.png",
+    "RuffianFront": "./ruffianFront.png",
+    "Grunt": "./grunt.png",
+    "Spearman": "./spearman.png",
+    "Agent": "./agent.png",
+    "Jack Noir": "./jackNoir.png"
+}
+enemySpots = {
+    "Grunt": (0, 0),
+    "RuffianBack": (-25, 130),
+    "RuffianFront": (0, 260),
+    "RuffianSolo": (0, 150),
+    "Spearman": (15, 145),
+    "Agent": (20, 150),
+    "Jack Noir": (0, 150)
+}
+
+# Estimation
+# 0, 0 is top left
+# 500, 0 is top right
+# 0, 200 is bottom left
+# 500, 200 is bottom right
+
+# The issue is that each character is slightly different sizes
+
+# 1. Manual hashmap of getting coordinates of feet per character
+# 2. spots for feet of each character to be placed
+# 3. paste character image at (x, y - character_height + feet_offset)
+
+charSpots = [(300, 170), (380, 90), (450, 195), (540, 150)]
+
+
+@bot.tree.command(name = "battle")
+@app_commands.choices(enemies=[
+    app_commands.Choice(name="Ruffian", value="Ruffian"),
+    app_commands.Choice(name="Grunt", value="Grunt"),
+    app_commands.Choice(name="Spearman", value="Spearman"),
+    app_commands.Choice(name="Agent", value="Agent"),
+    app_commands.Choice(name="Jack Noir", value="Jack Noir"),
+])
+async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[str]):
+    """Battle an Enemy"""
+    # Get user's team
+    user_data = inventory_collection.find_one({"user_id": interaction.user.id})
+    if not user_data:
+        await interaction.response.send_message(f"{interaction.user.mention} No inventory data found. Please contact an Admin immediately.")
+        return
+
+    team = user_data.get("team", [])
+    if len(team) < 1:
+        await interaction.response.send_message("You are not ready to fight!\nSet a team first using the /team command otherwise you will perish!")
+        return
+
+    # get a random background from the backgrounds hashmap
+    background_name, background_file = random.choice(list(backgrounds.items()))
+
+    # comnbine background and r_abraize images ontop one another using PIL
+    background_image = Image.open(background_file)
+    char1_image = Image.open(characterImages[team[0]])
+    char2_image = Image.open(characterImages[team[1]])
+    char3_image = Image.open(characterImages[team[2]])
+    char4_image = Image.open(characterImages[team[3]])
+   # enemy_image = Image.open(enemyImages[enemies.name])
+
+   # randomSpot = random.randint(0, 3)
+    if enemies.name == "Grunt":
+        enemy_image = Image.open(enemyImages[enemies.name])
+        background_image.paste(enemy_image, enemySpots[enemies.name], enemy_image)
+    elif enemies.name == "Ruffian":
+        # 80/20 if 2 or 1 ruffians show up
+        roll = random.random()
+        if roll < 0.5:
+            ruffianB = Image.open(enemyImages["RuffianBack"])
+            ruffianF = Image.open(enemyImages["RuffianFront"])
+            background_image.paste(ruffianB, enemySpots["RuffianBack"], ruffianB)
+            background_image.paste(ruffianF, enemySpots["RuffianFront"], ruffianF)
+        else:
+            ruffianB = Image.open(enemyImages["RuffianBack"])
+            background_image.paste(ruffianB, enemySpots["RuffianSolo"], ruffianB)
+    elif enemies.name == "Spearman":
+        enemy_image = Image.open(enemyImages[enemies.name])
+        background_image.paste(enemy_image, enemySpots[enemies.name], enemy_image)
+    elif enemies.name == "Agent":
+        enemy_image = Image.open(enemyImages[enemies.name])
+        background_image.paste(enemy_image, enemySpots[enemies.name], enemy_image)
+    elif enemies.name == "Jack Noir":
+        enemy_image = Image.open(enemyImages[enemies.name])
+        background_image.paste(enemy_image, enemySpots[enemies.name], enemy_image)
+
+    background_image.paste(char1_image, charSpots[0], char1_image)
+    background_image.paste(char2_image, charSpots[1], char2_image)
+    background_image.paste(char3_image, charSpots[2], char3_image)
+    background_image.paste(char4_image, charSpots[3], char4_image)
+
+    # save the combined image to a new file
+    combined_image_path = "./battle_screen.png"
+    background_image.save(combined_image_path)
+    # send the combined image as a discord message
+    embed = discord.Embed(title="Battle Screen", description=f"You are battling against **{enemies.name}**!", color=0x3f48cc)
+    embed.set_image(url="attachment://battle_screen.png")
+    await interaction.response.send_message(file=discord.File(combined_image_path), embed=embed, content=f"Battle against **{enemies.name}** initiated!")
+
+
+HELP_GIF_URL = "https://media.discordapp.net/attachments/796742546910871562/1442307872490000432/JITSTUCKMOBILEGAME.gif?ex=6926efa1&is=69259e21&hm=160f8b3552a36078f4941e02aafbb3408a95be77be4f5ffa6697ff3aacd53397&format=webp&animated=true"
+@bot.tree.command(name="help")
+async def help_command(ctx):
+    """Show Help"""
+    await ctx.response.send_message(HELP_GIF_URL)
+
+@bot.command()
+@commands.is_owner()  # Prevent other people from using the command
+async def syncapp(ctx: commands.Context) -> None:
+    """Sync app commands to Discord."""
+    await ctx.bot.tree.sync()
+    await ctx.send('Application commands synchronized!')
+
+
+
+if __name__ == "__main__":
+    bot.run(TOKEN)
