@@ -212,56 +212,114 @@ ssr_treyAttributes = [750, 30, 25, "30%", "90%", "Punch", "Cloak and Dagger", "S
 def ssr_treyEmbed():
     embed = discord.Embed(title=f"[Seeker of Silence]", description="Treyvaughn Lewis", color=0x3f48cc)
     embed.set_image(url=SSR_TREY_GIF)
-
+    embed.add_field(name="HP:", value=ssr_treyAttributes[0], inline=True)
+    embed.add_field(name="ATK:", value=ssr_treyAttributes[1], inline=True)
+    embed.add_field(name="DEF:", value=ssr_treyAttributes[2], inline=True)
+    embed.add_field(name="EVA:", value=ssr_treyAttributes[3], inline=True)
+    embed.add_field(name="ACC:", value=ssr_treyAttributes[4], inline=True)
+    embed.add_field(name=ssr_treyAttributes[5], value="Throw a mean right hook at the enemy.", inline=False)
+    embed.add_field(name=ssr_treyAttributes[6], value="Add a +100% eva buff and +10% acc buff to self for one turn. Performs a stabbing attack on one enemy that deals 10% max hp and true damage. Cannot be used for 2 turns.", inline=False)
+    embed.add_field(name=ssr_treyAttributes[7], value="Redistribute the void into those around you. +50% eva buff to all allies for 3 turns, but draws attacks to you for one turn. Cannot be used again for 4 turns.", inline=False)
+    embed.add_field(name=ssr_treyAttributes[8], value="Nothing can't be seen, right? Centering all of the void you control into one spot should be able to create a concentrated spot of nothing, a nothing so strong that no thing can escape it. Create a miniature \"void spot\" that stays on the battle for 3 turns. When on the stage, all ranged attacks automatically miss. For each ranged attack performed, the power grows by 50%. After every turn, power grows by 100%. At the end of 3 turns, deals the combined percentage of atk to all enemies in one burst. Cannot be used again.", inline=False)
     return embed
 
 r_noahAttributes = [180, 10, 8, "3%", "90%", "Punch", "Fiddle", "Bo"]
 def r_noahEmbed():
     embed = discord.Embed(title=f"[pillagingPirate]", description="Noah Cave", color=0x3f48cc)
     embed.set_image(url=R_NOAH_GIF)
-
+    embed.add_field(name="HP:", value=r_noahAttributes[0], inline=True)
+    embed.add_field(name="ATK:", value=r_noahAttributes[1], inline=True)
+    embed.add_field(name="DEF:", value=r_noahAttributes[2], inline=True)
+    embed.add_field(name="EVA:", value=r_noahAttributes[3], inline=True)
+    embed.add_field(name="ACC:", value=r_noahAttributes[4], inline=True)
+    embed.add_field(name=r_noahAttributes[5], value="Throws a mean right hook at the enemy.", inline=False)
+    embed.add_field(name=r_noahAttributes[6], value="Send an annoying text message to one enemy, applying a -5% acc debuff to them.", inline=False)
+    embed.add_field(name=r_noahAttributes[7], value="Apply \"Interfere\" state to self permanently until exhausted. \"Interfere\" state allows a 50% chance of an incoming enemy attack to be negated one time before the state is exhausted and removed from self. Can only be used again after 2 turns.", inline=False)
     return embed
 
 r_freemanAttributes = [180, 8, 8, "10%", "90%", "Slap", "Ponder", "SMASH!"]
 def r_freemanEmbed():
     embed = discord.Embed(title=f"[Who I am to Me]", description="Freeman", color=0x3f48cc)
     embed.set_image(url=R_FREEMAN_GIF)
-
+    embed.add_field(name="HP:", value=r_freemanAttributes[0], inline=True)
+    embed.add_field(name="ATK:", value=r_freemanAttributes[1], inline=True)
+    embed.add_field(name="DEF:", value=r_freemanAttributes[2], inline=True)
+    embed.add_field(name="EVA:", value=r_freemanAttributes[3], inline=True)
+    embed.add_field(name="ACC:", value=r_freemanAttributes[4], inline=True)
+    embed.add_field(name=r_freemanAttributes[5], value="Bitch slap the opponent with your weak arm.", inline=False)
+    embed.add_field(name=r_freemanAttributes[6], value="Apply a 3% eva buff to all allies for 1 turn.", inline=False)
+    embed.add_field(name=r_freemanAttributes[7], value="Apply a temporary +10% atk buff to self and deal damage to one opponent. The damage dealt is then subtracted from your hp.", inline=False)
     return embed
 
 sr_freemanAttributes = [180, 8, 8, "10%", "90%", "Pistol Whip", "Shoot", "Hide"]
 def sr_freemanEmbed():
     embed = discord.Embed(title=f"[Freedom in Jeopardy]", description="Freeman", color=0x3f48cc)
     embed.set_image(url=SR_FREEMAN_GIF)
-
+    embed.add_field(name="HP:", value=sr_freemanAttributes[0], inline=True)
+    embed.add_field(name="ATK:", value=sr_freemanAttributes[1], inline=True)
+    embed.add_field(name="DEF:", value=sr_freemanAttributes[2], inline=True)
+    embed.add_field(name="EVA:", value=sr_freemanAttributes[3], inline=True)
+    embed.add_field(name="ACC:", value=sr_freemanAttributes[4], inline=True)
+    embed.add_field(name=sr_freemanAttributes[5], value="Nobody expects a good clocking from a gun.", inline=False)
+    embed.add_field(name=sr_freemanAttributes[6], value="80% chance of the safety being on, dealing no damage. 20% that the safety was left off, dealing 10% of the enemy's current hp.", inline=False)
+    embed.add_field(name=sr_freemanAttributes[7], value="Apply \"Nervous\" state to self. As long as self has \"Nervous\" state, apply a 25% chance that each attack made by an enemy can be interrupted (similar to R Noah). When an attack is interrupted, trigger Ability 2 on the attacking enemy.", inline=False)
     return embed
 
 r_stephenAttributes = [180, 9, 8, "3%", "90%", "Dropkick", "Light up", "Lock the fuck in"]
 def r_stephenEmbed():
-    embed = discord.Embed(title=f"[You Marlowe?]", description="Steven Goraynov", color=0x3f48cc)
+    embed = discord.Embed(title=f"[You Marlowe?]", description="Stephen Goraynov", color=0x3f48cc)
     embed.set_image(url=R_STEPHEN_GIF)
-
+    embed.add_field(name="HP:", value=r_stephenAttributes[0], inline=True)
+    embed.add_field(name="ATK:", value=r_stephenAttributes[1], inline=True)
+    embed.add_field(name="DEF:", value=r_stephenAttributes[2], inline=True)
+    embed.add_field(name="EVA:", value=r_stephenAttributes[3], inline=True)
+    embed.add_field(name="ACC:", value=r_stephenAttributes[4], inline=True)
+    embed.add_field(name=r_stephenAttributes[5], value="Kick the shit out of one enemy.", inline=False)
+    embed.add_field(name=r_stephenAttributes[6], value="Light your BALLER CIGARETTE, drawing everyone's attention towards you. Applies \"Baller\" status to self for 3 turns. If hit during \"Baller\" status, remove one stack.", inline=False)
+    embed.add_field(name=r_stephenAttributes[7], value="Add +5% atk bonus for one turn per each \"Baller\" status self has.", inline=False)
     return embed
 
 sr_stephenAttributes = [180, 9, 8, "3%", "90%", "Dropkick", "Consider Intervening", "HIYAAAHHH!"]
 def sr_stephenEmbed():
-    embed = discord.Embed(title=f"[Master of Intervention]", description="Steven Goraynov", color=0x3f48cc)
+    embed = discord.Embed(title=f"[Master of Intervention]", description="Stephen Goraynov", color=0x3f48cc)
     embed.set_image(url=SR_STEPHEN_GIF)
-
+    embed.add_field(name="HP:", value=sr_stephenAttributes[0], inline=True)
+    embed.add_field(name="ATK:", value=sr_stephenAttributes[1], inline=True)
+    embed.add_field(name="DEF:", value=sr_stephenAttributes[2], inline=True)
+    embed.add_field(name="EVA:", value=sr_stephenAttributes[3], inline=True)
+    embed.add_field(name="ACC:", value=sr_stephenAttributes[4], inline=True)
+    embed.add_field(name=sr_stephenAttributes[5], value="Kick the shit out of an enemy.", inline=False)
+    embed.add_field(name=sr_stephenAttributes[6], value="Applies 1 stack of \"Considering\" state to self for 3 turns.", inline=False)
+    embed.add_field(name=sr_stephenAttributes[7], value="Converts each stack of \"Considering\" into a 10% damage buff and then attacks one enemy.", inline=False)
     return embed
 
 ssr_jaydenAttributes = [600, 30, 30, "5%", "90%", "Punch", "Butler of Swatabi", "Indecision", "Genesis"]
 def ssr_jaydenEmbed():
     embed = discord.Embed(title=f"[Sworn Protectorate of Creation]", description="Jayden Ceballos", color=0x3f48cc)
     embed.set_image(url=SSR_JAYDEN_GIF)
-
+    embed.add_field(name="HP:", value=ssr_jaydenAttributes[0], inline=True)
+    embed.add_field(name="ATK:", value=ssr_jaydenAttributes[1], inline=True)
+    embed.add_field(name="DEF:", value=ssr_jaydenAttributes[2], inline=True)
+    embed.add_field(name="EVA:", value=ssr_jaydenAttributes[3], inline=True)
+    embed.add_field(name="ACC:", value=ssr_jaydenAttributes[4], inline=True)
+    embed.add_field(name=ssr_jaydenAttributes[5], value="Throw a mean right hook at the enemy.", inline=False)
+    embed.add_field(name=ssr_jaydenAttributes[6], value="Leverage your dreadful reputation as the Butler of Ill Repute. -30% acc for all enemies.", inline=False)
+    embed.add_field(name=ssr_jaydenAttributes[7], value="33% chance to buff all allies atk and def by 20%, 33% chance to debuff all enemies atk and def by 20%, 33% chance to deal 1 hp of damage to self.", inline=False)
+    embed.add_field(name=ssr_jaydenAttributes[8], value="With the power of creation on your side, it is your sworn duty to bring about its influence in this world. It is your job to decrease the space between you and your allies, and to increase the space between your allies and your enemies. Apply \"Regeneration\" status (5% hp heal every turn) for the next 7 turns, as well as apply \"Warped\" status (-25% acc penalty, -35% max hp, -25% def) to all enemies for the next 7 turns. Cannot be used again.", inline=False)
     return embed
 
 sr_homestuckAttributes = [180, 18, 15, "5%", "90%", "Impractical Assailants", "Plunder", "Thief"]
 def sr_homestuckEmbed():
     embed = discord.Embed(title=f"[Thief in God's Clothing]", description="Homestuck", color=0x3f48cc)
     embed.set_image(url=SR_HOMESTUCK_GIF)
-
+    embed.add_field(name="HP:", value=sr_homestuckAttributes[0], inline=True)
+    embed.add_field(name="ATK:", value=sr_homestuckAttributes[1], inline=True)
+    embed.add_field(name="DEF:", value=sr_homestuckAttributes[2], inline=True)
+    embed.add_field(name="EVA:", value=sr_homestuckAttributes[3], inline=True)
+    embed.add_field(name="ACC:", value=sr_homestuckAttributes[4], inline=True)
+    embed.add_field(name=sr_homestuckAttributes[5], value="Roll a die! Deal damage in increments of 10 based on what you get!", inline=False)
+    embed.add_field(name=sr_homestuckAttributes[6], value="Apply a -15% atk debuff to one random ally for one turn, provide a +15% atk buff to self for one turn.", inline=False)
+    embed.add_field(name=sr_homestuckAttributes[7], value="Apply a -100% acc penalty to all enemies and a +100% acc bonus to all allies for one turn. Cannot be used again for 5 turns.", inline=False)
     return embed
 
 def roll_character(banner: str) -> str:
