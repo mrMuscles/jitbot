@@ -1017,7 +1017,8 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
         background_image.paste(enemy_image, enemySpots[enemies.name], enemy_image)
 
     # Place team characters dynamically based on their feet positions
-    for i, char_name in enumerate(team):
+    # Reverse order so slot 1 (index 0) is pasted last and appears on top
+    for i, char_name in reversed(list(enumerate(team))):
         if char_name in characterImages:
             char_image_path = characterImages[char_name]
             if os.path.exists(char_image_path):
