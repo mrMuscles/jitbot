@@ -620,7 +620,7 @@ class BattleView(discord.ui.View):
         
         # Add ability buttons
         player = battle_state.players[current_player_idx]
-        num_abilities = min(3, len(player["abilities"]))  # Skip ultimates (4th ability)
+        num_abilities = min(3, len(player["abilities"]))  # Skip ultimates (4th ability) - ultimates are too powerful for regular turns
         
         for i in range(num_abilities):
             ability_name = player["abilities"][i]
@@ -765,7 +765,7 @@ async def enemy_turn(interaction, battle_state):
         
         # Choose ability (random for most enemies)
         num_abilities = len(enemy["abilities"])
-        ability_idx = random.randint(0, min(2, num_abilities - 1))  # Skip ultimates if any
+        ability_idx = random.randint(0, min(2, num_abilities - 1))  # Skip ultimates - enemies don't use ultimate abilities for game balance
         ability_name = enemy["abilities"][ability_idx]
         
         # Choose target
@@ -1170,7 +1170,8 @@ class BattleState:
         # Initialize player stats
         self.players = []
         for char_name in team:
-            attrs = CHARACTER_ATTRIBUTES_MAP.get(char_name, [200, 10, 10, "3%", "90%", "Punch", "Ability2", "Ability3"])
+            # Fallback attributes are for characters not yet implemented
+            attrs = CHARACTER_ATTRIBUTES_MAP.get(char_name, [200, 10, 10, "3%", "90%", "Punch", "Special Ability", "Power Ability"])
             player = {
                 "name": char_name,
                 "title": characterTitles.get(char_name, char_name),

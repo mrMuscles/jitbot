@@ -138,10 +138,11 @@ def execute_r_abraize_ability(battle_state, attacker, ability_idx, targets):
         logs.extend(execute_basic_attack(battle_state, attacker, targets[0] if targets else None))
     elif ability_idx == 1:  # Sleep
         logs.append(f"**{title}** takes a nap!")
-        # Reduce evasion to 0% for one turn
+        # Reduce evasion to 0% for one turn, unable to act
         attacker["eva"] = 0
-        # Add buff to be applied after 1 turn
+        # Track sleeping state (1 turn of sleep)
         attacker["special_states"]["sleeping"] = 1
+        # After waking up, apply buff for 2 turns
         attacker["special_states"]["sleep_buff_pending"] = 2
     elif ability_idx == 2:  # Missing Assignments
         logs.append(f"**{title}** completes missing assignments!")
@@ -370,6 +371,7 @@ def execute_sr_freeman_ability(battle_state, attacker, ability_idx, targets):
     if ability_idx == 0:  # Pistol Whip
         logs.extend(execute_basic_attack(battle_state, attacker, targets[0] if targets else None))
     elif ability_idx == 1:  # Shoot
+        # SR Freeman's Shoot ability: 80% safety on (no damage), 20% safety off (10% current HP damage)
         if targets and random.random() < 0.20:  # 20% safety off
             damage = int(targets[0]["hp"] * 0.10)
             targets[0]["hp"] = max(0, targets[0]["hp"] - damage)
@@ -561,11 +563,13 @@ def execute_enemy_ability(battle_state, enemy, ability_idx, targets):
     if ability_idx == 0:  # Basic attack
         logs.extend(execute_basic_attack(battle_state, enemy, target))
     elif enemy.get("type") == "Grunt" and ability_idx == 1:  # Slam
+        # Grunt's Slam ability deals flat 15 damage to all party members
+        GRUNT_SLAM_DAMAGE = 15
         for player in get_all_allies(battle_state, False):
-            player["hp"] = max(0, player["hp"] - 15)
+            player["hp"] = max(0, player["hp"] - GRUNT_SLAM_DAMAGE)
             if player["hp"] == 0:
                 player["alive"] = False
-        logs.append(f"**{enemy_name}** uses Slam! All players take 15 damage!")
+        logs.append(f"**{enemy_name}** uses Slam! All players take {GRUNT_SLAM_DAMAGE} damage!")
     elif enemy.get("type") == "Spearman":
         if ability_idx == 1:  # Swipe
             for player in get_all_allies(battle_state, False):
