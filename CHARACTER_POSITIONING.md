@@ -25,6 +25,16 @@ The system automatically prevents characters from being cut off by:
 
 Some characters (like `ssr_scottie`) are designed to float above the ground. These characters have special Y-axis offsets defined in the `characterFloatingOffset` dictionary.
 
+### Character Layering
+
+Characters are pasted on the battle screen in reverse order (from slot 4 to slot 1), ensuring that:
+- **Slot 1** (index 0) appears on top (pasted last)
+- **Slot 2** (index 1) appears below slot 1
+- **Slot 3** (index 2) appears below slot 2
+- **Slot 4** (index 3) appears at the back (pasted first)
+
+This creates a natural visual depth where front characters overlap those behind them.
+
 ## Adding a New Character
 
 To add a new character to the system:
