@@ -8,6 +8,7 @@ import random
 from collections import Counter
 from PIL import Image
 from dotenv import load_dotenv
+from battle_abilities import execute_ability
 load_dotenv("token.env")
 
 MONGO_URI = "mongodb://localhost:27017"
@@ -699,28 +700,10 @@ async def execute_player_action(interaction, battle_state, player_idx, ability_i
     battle_state.apply_buffs_debuffs(player)
     battle_state.apply_buffs_debuffs(target)
     
-    # Execute basic attack (Punch/Slap/etc.)
-    if ability_idx == 0:
-        damage, hit = battle_state.calculate_damage(player, target)
-        if hit:
-            target["hp"] -= damage
-            battle_state.add_log(f"**{player['title']}** used **{ability_name}** on **{target['name']}** for **{damage}** damage!")
-        else:
-            battle_state.add_log(f"**{player['title']}** used **{ability_name}** but missed!")
-    else:
-        # For now, simplified ability execution - full implementation would parse each ability
-        damage, hit = battle_state.calculate_damage(player, target)
-        if hit:
-            target["hp"] -= damage
-            battle_state.add_log(f"**{player['title']}** used **{ability_name}** on **{target['name']}** for **{damage}** damage!")
-        else:
-            battle_state.add_log(f"**{player['title']}** used **{ability_name}** but missed!")
-    
-    # Check if enemy died
-    if target["hp"] <= 0:
-        target["hp"] = 0
-        target["alive"] = False
-        battle_state.add_log(f"**{target['name']}** has been defeated!")
+    # Execute ability using comprehensive ability system
+    logs = execute_ability(battle_state, player, ability_idx, [target], is_player=True)
+    for log in logs:
+        battle_state.add_log(log)
     
     # Check battle end
     if battle_state.check_battle_end():
@@ -796,19 +779,10 @@ async def enemy_turn(interaction, battle_state):
         # Apply buffs/debuffs to target
         battle_state.apply_buffs_debuffs(target)
         
-        # Execute attack
-        damage, hit = battle_state.calculate_damage(enemy, target)
-        if hit:
-            target["hp"] -= damage
-            battle_state.add_log(f"**{enemy['name']}** used **{ability_name}** on **{target['title']}** for **{damage}** damage!")
-        else:
-            battle_state.add_log(f"**{enemy['name']}** used **{ability_name}** but missed!")
-        
-        # Check if player died
-        if target["hp"] <= 0:
-            target["hp"] = 0
-            target["alive"] = False
-            battle_state.add_log(f"**{target['title']}** has fallen!")
+        # Execute ability using comprehensive ability system
+        logs = execute_ability(battle_state, enemy, ability_idx, [target], is_player=False)
+        for log in logs:
+            battle_state.add_log(log)
         
         alive_players = battle_state.get_alive_players()
         
@@ -1253,6 +1227,7 @@ class BattleState:
         self.battle_log = []
         self.battle_over = False
         self.victory = False
+        self.special_states = {}  # Global battle states (like void spot)
     
     def add_log(self, message):
         """Add a message to the battle log"""
