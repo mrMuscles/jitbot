@@ -122,6 +122,7 @@ SR_STEPHEN_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1
 SSR_JAYDEN_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1441662516672331836/SSR_JAYDEN.gif?ex=692a8558&is=692933d8&hm=c5f5376d3603ce635598548977465872e7a3662802986c6f742c1f590eadd7a4&=&width=813&height=524"
 SR_HOMESTUCK_GIF = "https://media.discordapp.net/attachments/907662210619289600/1441689825911505026/SR_HOMESTUCK.gif?ex=6941b107&is=69405f87&hm=181544c05734a721ea53bbe630dcb4b25ed7b95327661a807b97bdba81cc7506&=&width=813&height=524"
 SSR_SCOTTIE_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1441591428042985492/SSR_SCOTTIE.gif?ex=69551be3&is=6953ca63&hm=9a1141a0f327f2f16ed80b996243679e62491b0fa2b985babdc1bc09d82cccaa&=&width=813&height=524"
+RECYCLE_GIF = "https://media.discordapp.net/attachments/796742546910871562/1455728132240703593/recycled_B.gif?ex=6955c7f8&is=69547678&hm=a047b1b23feab6ea79f4c79303bd9ee6bfba8ba9b800813754e05b9615529585&=&width=678&height=438"
 
 # Use abraizeEmbed as example for other characters
 # HP attack and defense are integers
@@ -516,14 +517,18 @@ async def inventory(ctx):
         rolls = user_data.get("rolls", 0)
         inventory = user_data.get("inventory", {})
 
-        ssr_inventory = {char: count for char, count in inventory.items() if char in ssrChar}
+      #  special_inventory = {char: count for char, count in inventory.items() if char in specialChar}
+        ssr_inventory = {char: count for char, count in inventory.items() if char in ssrChar or char in specialChar}
         sr_inventory = {char: count for char, count in inventory.items() if char in srChar}
         r_inventory = {char: count for char, count in inventory.items() if char in rChar}
 
         embed = discord.Embed(title=f"{ctx.user.display_name}'s Inventory", color=0x3f48cc)
 
+     #   if special_inventory:
+      #      embed.add_field(name="Special Characters:", value="\n".join([f"{characterTitles[char]}: {count}" for char, count in special_inventory.items()]), inline=False)
         if ssr_inventory:
             embed.add_field(name="SSR Characters:", value="\n".join([f"{characterTitles[char]}: {count}" for char, count in ssr_inventory.items()]), inline=False)
+
         if sr_inventory:
             embed.add_field(name="SR Characters:", value="\n".join([f"{characterTitles[char]}: {count}" for char, count in sr_inventory.items()]), inline=False)
         if r_inventory:
@@ -551,7 +556,8 @@ async def char(interaction: discord.Interaction, character_name: app_commands.Ch
     if user_data:
         inventory = user_data.get("inventory", {})
         if inventory.get(char_dev_name, 0) < 1:
-            await interaction.followup.send("You do not own this character yet!")
+            NO_OWN_PNG = "./broke.png"
+            await interaction.followup.send(file=discord.File(NO_OWN_PNG))
             return
     else:
         await interaction.followup.send("No inventory data found.")
@@ -587,13 +593,7 @@ async def char(interaction: discord.Interaction, character_name: app_commands.Ch
     elif char_dev_name == "sr_homestuck":
         embed = sr_homestuckEmbed()
     elif char_dev_name == "ssr_scottie":
-        # ssr_scottie character details are not yet available
-        embed = discord.Embed(
-            title="[Eternal Guardian]",
-            description="Scottie Jenkins",
-            color=0x3f48cc
-        )
-        embed.add_field(name="Status", value="Character information coming soon!", inline=False)
+        embed = ssr_scottieEmbed()
     else:
         await interaction.followup.send(f"Character **{char_dev_name}** does not exist!")
         return
@@ -632,7 +632,8 @@ async def recycle(ctx: discord.Interaction, character_name: app_commands.Choice[
 
         # Check if user owns the character
         if char_count < 1:
-            await ctx.response.send_message("You do not own this character yet!")
+            NO_OWN_PNG = "./broke.png"
+            await ctx.response.send_message(file=discord.File(NO_OWN_PNG))
             return
 
         if char_count >= amount:
@@ -697,9 +698,9 @@ async def recycle(ctx: discord.Interaction, character_name: app_commands.Choice[
 
 
                   #  if rolls_to_add == 0:
-                    await ctx.followup.send(f"Recycled **{char_title} x{amount}**. Your total rolls is **{rolls_gain + user_data.get('rolls', 0)}** rolls.")
-                #    else:
-                 #       await ctx.followup.send(f"Recycled **{character_name} x{amount}** for **{rolls_to_add}** rolls!, Your total rolls is **x{user_data.get('rolls', 0) + rolls_to_add}** rolls.")
+                    embed = discord.Embed(title=f"Recycled **{char_title} x{amount}**. Your total rolls is **{rolls_gain + user_data.get('rolls', 0)}** rolls.", color=0x3f48cc)
+                    embed.set_image(url=RECYCLE_GIF)
+                    await ctx.followup.send(embed=embed)
                 else:  # no_button pressed
                     await ctx.followup.send("Recycling cancelled.")
             except asyncio.TimeoutError:
@@ -771,7 +772,8 @@ async def team(ctx: discord.Interaction, char1: app_commands.Choice[str] = None,
         inventory = user_data.get("inventory", {})
         for i, char in enumerate(team_chars):
             if inventory.get(char, 0) < 1:
-                await ctx.response.send_message(f"You do not own this character yet! **{team_titles[i]}**")
+                NO_OWN_PNG = "./broke.png"
+                await ctx.response.send_message(file=discord.File(NO_OWN_PNG))
                 return
 
     # Update team in database
@@ -827,6 +829,14 @@ enemySpots = {
     "Jack Noir": (0, 150)
 }
 
+enemyAttributes = {
+    "Ruffian": [175, 5, 5, "0%", "80%", "Punch"],
+    "Grunt": [400, 25, 45, "0%", "65%", "Punch", "Slam, Deal 15 Damage to all party members"],
+    "Spearman": [175, 5, 5, "0%", "80%", "Punch", "Swipe, Deal damage to all party members", "Stab, Apply 15%% attack bonus to self for this turn and deal damage"],
+    "Agent": [175, 5, 5, "0%", "80%", "Punch", "Sneak, Add 15%% evasion to self for this turn"],
+    "Jack Noir": [1000, 30, 10, "5%", "90%", "Stab", "Shiv, Deal damage and apply bleed (-3% hp per turn) for one turn, this can stack", "Slash, Deal only 5 damage to all party members, but apply bleed to all party members for one turn.", "Extra Passive: Attack lowest health party member each turn"]
+}
+
 # ============================================================================
 # DYNAMIC CHARACTER POSITIONING SYSTEM
 # ============================================================================
@@ -867,9 +877,9 @@ enemySpots = {
 characterFeet = {
     "r_abraize": (53, 252),
     "r_abraize2": (57, 226),
-    "sr_abraize": (87, 235),  # File doesn't exist yet, using estimated values
+    "sr_abraize": (70, 209),
     "ssr_abraize": (87, 235),
-    "r_trey": (72, 263),  # File doesn't exist yet, using estimated values
+    "r_trey": (52, 247),
     "sr_trey": (68, 263),
     "ssr_trey": (72, 291),
     "r_noah": (39, 214),
@@ -895,7 +905,7 @@ characterFloatingOffset = {
 # Note: These use 0-based indexing (slot_index 0-3 in code)
 teamSlotGroundPositions = [
     (500, 400),  # Index 0 (Slot 1 in /viewteam) - front right
-    (380, 380),  # Index 1 (Slot 2 in /viewteam) - middle right  
+    (380, 380),  # Index 1 (Slot 2 in /viewteam) - middle right
     (580, 360),  # Index 2 (Slot 3 in /viewteam) - back right
     (460, 340),  # Index 3 (Slot 4 in /viewteam) - far back
 ]
@@ -903,18 +913,18 @@ teamSlotGroundPositions = [
 def calculate_character_position(char_name, slot_index, background_size):
     """
     Calculate the paste position for a character based on their feet position.
-    
+
     Args:
         char_name: Character identifier (e.g., "r_abraize")
         slot_index: Team slot index (0-3)
         background_size: Tuple of (width, height) of the background image
-        
+
     Returns:
         Tuple of (x, y) coordinates where the character image should be pasted
     """
     # Get the target ground position for this slot
     target_x, target_y = teamSlotGroundPositions[slot_index]
-    
+
     # Get the character's feet position within their sprite
     # If not defined, calculate default position from the image
     if char_name not in characterFeet:
@@ -929,37 +939,37 @@ def calculate_character_position(char_name, slot_index, background_size):
             feet_x, feet_y = 0, 0
     else:
         feet_x, feet_y = characterFeet[char_name]
-    
+
     # Calculate where to paste the character so their feet align with the target
     paste_x = target_x - feet_x
     paste_y = target_y - feet_y
-    
+
     # Apply floating offset if this character is a floater
     floating_offset = characterFloatingOffset.get(char_name, 0)
     paste_y += floating_offset
-    
+
     # Prevent cutoff on the edges
     char_image_path = characterImages.get(char_name)
     if char_image_path and os.path.exists(char_image_path):
         char_img = Image.open(char_image_path)
         char_width, char_height = char_img.size
-        
+
         # Ensure character doesn't go off the right edge
         if paste_x + char_width > background_size[0]:
             paste_x = background_size[0] - char_width
-        
+
         # Ensure character doesn't go off the bottom edge
         if paste_y + char_height > background_size[1]:
             paste_y = background_size[1] - char_height
-        
+
         # Ensure character doesn't go off the left edge
         if paste_x < 0:
             paste_x = 0
-            
+
         # Ensure character doesn't go off the top edge
         if paste_y < 0:
             paste_y = 0
-    
+
     return (int(paste_x), int(paste_y))
 
 
@@ -990,7 +1000,7 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
     # comnbine background and r_abraize images ontop one another using PIL
     background_image = Image.open(background_file)
     background_size = background_image.size
-    
+
     # Place enemies first (in the background layer)
     if enemies.name == "Grunt":
         enemy_image = Image.open(enemyImages[enemies.name])
