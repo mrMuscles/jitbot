@@ -1077,12 +1077,6 @@ class BattleView(discord.ui.View):
             current_char = self.get_current_character()
             char_title = characterTitles.get(current_char, current_char)
             
-            # Show which ability was used
-            await interaction.response.send_message(
-                f"**{char_title}** used **{ability_name}**! (No implementation yet)",
-                ephemeral=False
-            )
-            
             # Move to next character
             self.current_character_index += 1
             
@@ -1090,24 +1084,38 @@ class BattleView(discord.ui.View):
             if self.current_character_index >= len(self.team):
                 # Switch to enemy turn
                 self.is_enemy_turn = True
+                
+                # Show which ability was used
+                await interaction.response.send_message(
+                    f"**{char_title}** used **{ability_name}**! (No implementation yet)\n\nAll players have taken their turn!",
+                    ephemeral=False
+                )
+                
                 await self.execute_enemy_turn(interaction)
             else:
                 # Update buttons for next character
                 self.update_ability_buttons()
                 next_char = self.get_current_character()
                 next_char_title = characterTitles.get(next_char, next_char)
-                await interaction.followup.send(
-                    f"It's now **{next_char_title}**'s turn!",
-                    view=self,
+                
+                # Show which ability was used and update view
+                await interaction.response.send_message(
+                    f"**{char_title}** used **{ability_name}**! (No implementation yet)\n\nIt's now **{next_char_title}**'s turn!",
                     ephemeral=False
                 )
+                
+                # Update the original message with new buttons
+                try:
+                    await interaction.message.edit(view=self)
+                except:
+                    pass  # In case message can't be edited
         
         return callback
     
     async def execute_enemy_turn(self, interaction: discord.Interaction):
         """Execute the enemy turn with a 10-second delay."""
         await interaction.followup.send(
-            f"All players have taken their turn! **{self.enemy_name}** is preparing to attack...",
+            f"**{self.enemy_name}** is preparing to attack...",
             ephemeral=False
         )
         
@@ -1126,9 +1134,14 @@ class BattleView(discord.ui.View):
         
         await interaction.followup.send(
             f"**{self.enemy_name}** attacked! (No implementation yet)\n\nIt's now **{first_char_title}**'s turn again!",
-            view=self,
             ephemeral=False
         )
+        
+        # Update the original message with new buttons for the first character
+        try:
+            await interaction.message.edit(view=self)
+        except:
+            pass  # In case message can't be edited
     
     @discord.ui.button(label="Retreat", style=discord.ButtonStyle.danger, custom_id="retreat_button", row=4)
     async def retreat_button(self, interaction: discord.Interaction, button: discord.ui.Button):
