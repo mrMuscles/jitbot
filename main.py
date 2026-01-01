@@ -1107,8 +1107,8 @@ class BattleView(discord.ui.View):
                 # Update the original message with new buttons
                 try:
                     await interaction.message.edit(view=self)
-                except:
-                    pass  # In case message can't be edited
+                except (discord.HTTPException, discord.NotFound):
+                    pass  # In case message can't be edited or was deleted
         
         return callback
     
@@ -1140,8 +1140,8 @@ class BattleView(discord.ui.View):
         # Update the original message with new buttons for the first character
         try:
             await interaction.message.edit(view=self)
-        except:
-            pass  # In case message can't be edited
+        except (discord.HTTPException, discord.NotFound):
+            pass  # In case message can't be edited or was deleted
     
     @discord.ui.button(label="Retreat", style=discord.ButtonStyle.danger, custom_id="retreat_button", row=4)
     async def retreat_button(self, interaction: discord.Interaction, button: discord.ui.Button):
