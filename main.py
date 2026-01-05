@@ -1276,10 +1276,17 @@ class BattleView(discord.ui.View):
             # Add to battle log
             self.battle_log.append(f"{char_title} used {ability_name}!")
 
-            # Move to next character
+            # Move to next character (skip dead ones)
             self.current_character_index += 1
+            
+            # Skip dead characters
+            while self.current_character_index < len(self.team):
+                next_char = self.team[self.current_character_index]
+                if self.player_states[next_char]["is_alive"]:
+                    break
+                self.current_character_index += 1
 
-            # Check if all players have gone
+            # Check if all alive players have gone
             if self.current_character_index >= len(self.team):
                 # Switch to enemy turn
                 self.is_enemy_turn = True
@@ -1437,8 +1444,15 @@ class BattleView(discord.ui.View):
         # Enemy turn complete, switch back to player turn
         self.is_enemy_turn = False
         self.current_character_index = 0
+        
+        # Skip to first alive character
+        while self.current_character_index < len(self.team):
+            char = self.team[self.current_character_index]
+            if self.player_states[char]["is_alive"]:
+                break
+            self.current_character_index += 1
 
-        # Update buttons for first character again
+        # Update buttons for first alive character
         self.update_ability_buttons()
 
         # Update embed with new state
