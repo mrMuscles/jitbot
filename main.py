@@ -1118,7 +1118,7 @@ class BattleView(discord.ui.View):
             if self.current_character_index >= len(self.team):
                 # Switch to enemy turn
                 self.is_enemy_turn = True
-                self.battle_log.append("All players have acted. Enemy's turn!")
+                self.battle_log.append(f"All players have acted. {self.enemy_name}'s turn!")
                 
                 # Update embed with new state
                 new_embed = self.create_battle_embed()
