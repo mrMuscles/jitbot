@@ -859,9 +859,9 @@ enemySpots = {
 enemyAttributes = {
     "Ruffian": [175, 5, 5, "0%", "80%", "Punch"],
     "Grunt": [400, 25, 45, "0%", "65%", "Punch", "Slam, Deal 15 Damage to all party members"],
-    "Spearman": [175, 5, 5, "0%", "80%", "Punch", "Swipe, Deal damage to all party members", "Stab, Apply 15%% attack bonus to self for this turn and deal damage"],
-    "Agent": [175, 5, 5, "0%", "80%", "Punch", "Sneak, Add 15%% evasion to self for this turn"],
-    "Jack Noir": [1000, 30, 10, "5%", "90%", "Stab", "Shiv, Deal damage and apply bleed (-3% hp per turn) for one turn, this can stack", "Slash, Deal only 5 damage to all party members, but apply bleed to all party members for one turn.", "Extra Passive: Attack lowest health party member each turn"]
+    "Spearman": [175, 5, 5, "0%", "80%", "Punch", "Swipe, Deal 20 damage to all party members", "Stab, Apply 15%% attack damage bonus to self for this turn and deal damage"],
+    "Agent": [175, 5, 5, "0%", "80%", "Punch", "Sneak, Add 15%% evasion to self for next 4 turns, then use Punch"],
+    "Jack Noir": [1000, 30, 10, "5%", "90%", "Stab", "Shiv, Deal damage and apply bleed to player (-3% hp per turn) for one turn, this can stack", "Slash, Deal only 5 damage to all party members, but apply bleed to all party members for one turn.", "Extra Passive: Attack lowest health party member each turn"]
 }
 
 # ============================================================================
