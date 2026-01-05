@@ -55,7 +55,7 @@ async def on_ready():
                     "inventory": {},
                     "rolls": 10,  # Starting rolls,
                     "counter": 0,
-                    "team": [],
+                    "team": []
                 }
                 # Use upsert to avoid duplicates
                 inventory_collection.update_one(
