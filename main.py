@@ -1004,6 +1004,12 @@ def calculate_character_position(char_name, slot_index, background_size):
 # BATTLE STATE AND COMBAT CALCULATIONS
 # ============================================================================
 
+def parse_percentage_stat(value) -> float:
+    """Parse a percentage stat (e.g., '90%' or 0.90) to a float."""
+    if isinstance(value, str):
+        return float(value.rstrip('%')) / 100
+    return float(value)
+
 def get_character_rarity_multiplier(char_name: str) -> float:
     """Get the rarity multiplier for a character (R=1, SR=1.5, SSR=2)."""
     if char_name in ssrChar or char_name in specialChar:
@@ -1040,8 +1046,8 @@ def get_character_attributes(char_name: str) -> dict:
         "hp": attrs[0],
         "atk": attrs[1],
         "def": attrs[2],
-        "eva": float(attrs[3].rstrip('%')) / 100 if isinstance(attrs[3], str) else attrs[3],
-        "acc": float(attrs[4].rstrip('%')) / 100 if isinstance(attrs[4], str) else attrs[4],
+        "eva": parse_percentage_stat(attrs[3]),
+        "acc": parse_percentage_stat(attrs[4]),
     }
 
 def calculate_ehp(hp: int, defense: int, rarity_multiplier: float) -> int:
@@ -1118,24 +1124,26 @@ class BattleView(discord.ui.View):
         
         # Initialize enemy states
         self.enemy_states = []
-        enemy_attrs = enemyAttributes.get(enemy_name, [175, 5, 5, "0%", "80%"])
+        enemy_attrs = enemyAttributes.get(enemy_name, [175, 5, 5, "0%", "80%", "Punch"])  # Default with at least one ability
         for i in range(enemy_count):
             enemy_hp = enemy_attrs[0]
             enemy_id = f"{enemy_name}_{i}"
+            # Safely get abilities (everything after index 4)
+            enemy_abilities = enemy_attrs[5:] if len(enemy_attrs) > 5 else ["Punch"]
             self.enemy_states.append({
                 "id": enemy_id,
                 "name": enemy_name,
                 "base_hp": enemy_hp,
                 "base_atk": enemy_attrs[1],
                 "base_def": enemy_attrs[2],
-                "base_eva": float(enemy_attrs[3].rstrip('%')) / 100 if isinstance(enemy_attrs[3], str) else enemy_attrs[3],
-                "base_acc": float(enemy_attrs[4].rstrip('%')) / 100 if isinstance(enemy_attrs[4], str) else enemy_attrs[4],
+                "base_eva": parse_percentage_stat(enemy_attrs[3]),
+                "base_acc": parse_percentage_stat(enemy_attrs[4]),
                 "current_hp": enemy_hp,
                 "total_hp": enemy_hp,
                 "is_alive": True,
                 "buffs": {},
                 "debuffs": {},
-                "abilities": enemy_attrs[5:],  # All abilities after base stats
+                "abilities": enemy_abilities,
             })
 
         # Update buttons for the first character
@@ -1326,7 +1334,8 @@ class BattleView(discord.ui.View):
                 break
                 
             # Choose random ability (exclude passive descriptions)
-            abilities = [a for a in enemy["abilities"] if not a.startswith("Extra Passive")]
+            # Safely filter only string abilities that don't start with "Extra Passive"
+            abilities = [a for a in enemy["abilities"] if isinstance(a, str) and not a.startswith("Extra Passive")]
             if not abilities:
                 continue
                 
