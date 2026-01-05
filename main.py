@@ -1189,8 +1189,28 @@ class BattleView(discord.ui.View):
         new_embed = self.create_battle_embed()
         await interaction.response.edit_message(embed=new_embed, view=self)
 
+        # Set user as no longer in battle
+        inventory_collection.update_one(
+            {"user_id": self.user_id},
+            {"$set": {"inBattle": False}}
+        )
+
         # Stop the view
         self.stop()
+
+    async def on_timeout(self):
+        """Called when the view times out after 5 minutes of inactivity."""
+        # Set user as no longer in battle
+        inventory_collection.update_one(
+            {"user_id": self.user_id},
+            {"$set": {"inBattle": False}}
+        )
+
+        # Stop the view
+        self.stop()
+
+        # Call parent's on_timeout if it exists
+        await super().on_timeout()
 
 
 @bot.tree.command(name = "battle")
@@ -1207,6 +1227,11 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
     user_data = inventory_collection.find_one({"user_id": interaction.user.id})
     if not user_data:
         await interaction.response.send_message(f"{interaction.user.mention} No inventory data found. Please contact an Admin immediately.")
+        return
+
+    # Check if user is already in a battle
+    if user_data.get("inBattle", False):
+        await interaction.response.send_message("You are already in a battle! Please finish your current battle before starting a new one.", ephemeral=True)
         return
 
     team = user_data.get("team", [])
@@ -1266,12 +1291,26 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
     # Create initial battle embed
     embed = battle_view.create_battle_embed()
 
-    # send the combined image as a discord message with interactive buttons
-    await interaction.response.send_message(
-        file=discord.File(combined_image_path),
-        embed=embed,
-        view=battle_view
+    # Set user as in battle
+    inventory_collection.update_one(
+        {"user_id": interaction.user.id},
+        {"$set": {"inBattle": True}}
     )
+
+    # send the combined image as a discord message with interactive buttons
+    try:
+        await interaction.response.send_message(
+            file=discord.File(combined_image_path),
+            embed=embed,
+            view=battle_view
+        )
+    except (discord.HTTPException, discord.DiscordException) as e:
+        # If sending fails, reset the battle state
+        inventory_collection.update_one(
+            {"user_id": interaction.user.id},
+            {"$set": {"inBattle": False}}
+        )
+        raise
 
 
 HELP_GIF_URL = "https://media.discordapp.net/attachments/796742546910871562/1442307872490000432/JITSTUCKMOBILEGAME.gif?ex=6926efa1&is=69259e21&hm=160f8b3552a36078f4941e02aafbb3408a95be77be4f5ffa6697ff3aacd53397&format=webp&animated=true"
