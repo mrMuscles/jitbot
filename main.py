@@ -1209,9 +1209,6 @@ class BattleView(discord.ui.View):
         # Stop the view
         self.stop()
 
-        # Call parent's on_timeout if it exists
-        await super().on_timeout()
-
 
 @bot.tree.command(name = "battle")
 @app_commands.choices(enemies=[
@@ -1304,7 +1301,7 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
             embed=embed,
             view=battle_view
         )
-    except (discord.HTTPException, discord.DiscordException) as e:
+    except discord.DiscordException:
         # If sending fails, reset the battle state
         inventory_collection.update_one(
             {"user_id": interaction.user.id},
