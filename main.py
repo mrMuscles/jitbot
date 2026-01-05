@@ -1205,6 +1205,9 @@ class BattleView(discord.ui.View):
             {"user_id": self.user_id},
             {"$set": {"inBattle": False}}
         )
+        
+        # Stop the view
+        self.stop()
 
 
 @bot.tree.command(name = "battle")
@@ -1292,11 +1295,19 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
     )
 
     # send the combined image as a discord message with interactive buttons
-    await interaction.response.send_message(
-        file=discord.File(combined_image_path),
-        embed=embed,
-        view=battle_view
-    )
+    try:
+        await interaction.response.send_message(
+            file=discord.File(combined_image_path),
+            embed=embed,
+            view=battle_view
+        )
+    except Exception as e:
+        # If sending fails, reset the battle state
+        inventory_collection.update_one(
+            {"user_id": interaction.user.id},
+            {"$set": {"inBattle": False}}
+        )
+        raise
 
 
 HELP_GIF_URL = "https://media.discordapp.net/attachments/796742546910871562/1442307872490000432/JITSTUCKMOBILEGAME.gif?ex=6926efa1&is=69259e21&hm=160f8b3552a36078f4941e02aafbb3408a95be77be4f5ffa6697ff3aacd53397&format=webp&animated=true"
