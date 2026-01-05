@@ -1019,6 +1019,7 @@ class BattleView(discord.ui.View):
         self.current_character_index = 0
         self.is_enemy_turn = False
         self.battle_ended = False
+        self.battle_log = []  # Store battle actions for embed updates
         
         # Update buttons for the first character
         self.update_ability_buttons()
@@ -1028,6 +1029,36 @@ class BattleView(discord.ui.View):
         if self.current_character_index < len(self.team):
             return self.team[self.current_character_index]
         return None
+    
+    def create_battle_embed(self):
+        """Create or update the battle embed with current state."""
+        current_char = self.get_current_character()
+        
+        # Build description with current turn info and battle log
+        if self.battle_ended:
+            description = f"Battle against **{self.enemy_name}** has ended.\n\n"
+        elif self.is_enemy_turn:
+            description = f"**{self.enemy_name}**'s turn!\n\n"
+        elif current_char:
+            char_title = characterTitles.get(current_char, current_char)
+            description = f"It's **{char_title}**'s turn!\n\n"
+        else:
+            description = f"Battle against **{self.enemy_name}**\n\n"
+        
+        # Add recent battle log (last 5 entries)
+        if self.battle_log:
+            description += "**Battle Log:**\n"
+            for log_entry in self.battle_log[-5:]:
+                description += f"• {log_entry}\n"
+        
+        embed = discord.Embed(
+            title="Battle Screen",
+            description=description,
+            color=0x3f48cc
+        )
+        embed.set_image(url="attachment://battle_screen.png")
+        
+        return embed
     
     def update_ability_buttons(self):
         """Update ability buttons based on current character."""
@@ -1077,6 +1108,9 @@ class BattleView(discord.ui.View):
             current_char = self.get_current_character()
             char_title = characterTitles.get(current_char, current_char)
             
+            # Add to battle log
+            self.battle_log.append(f"{char_title} used {ability_name}!")
+            
             # Move to next character
             self.current_character_index += 1
             
@@ -1084,43 +1118,30 @@ class BattleView(discord.ui.View):
             if self.current_character_index >= len(self.team):
                 # Switch to enemy turn
                 self.is_enemy_turn = True
+                self.battle_log.append("All players have acted. Enemy's turn!")
                 
-                # Show which ability was used
-                await interaction.response.send_message(
-                    f"**{char_title}** used **{ability_name}**! (No implementation yet)\n\nAll players have taken their turn!",
-                    ephemeral=False
-                )
+                # Update embed with new state
+                new_embed = self.create_battle_embed()
+                await interaction.response.edit_message(embed=new_embed, view=self)
                 
                 await self.execute_enemy_turn(interaction)
             else:
                 # Update buttons for next character
                 self.update_ability_buttons()
-                next_char = self.get_current_character()
-                next_char_title = characterTitles.get(next_char, next_char)
                 
-                # Show which ability was used and update view
-                await interaction.response.send_message(
-                    f"**{char_title}** used **{ability_name}**! (No implementation yet)\n\nIt's now **{next_char_title}**'s turn!",
-                    ephemeral=False
-                )
-                
-                # Update the original message with new buttons
-                try:
-                    await interaction.message.edit(view=self)
-                except (discord.HTTPException, discord.NotFound):
-                    pass  # In case message can't be edited or was deleted
+                # Update embed with new state
+                new_embed = self.create_battle_embed()
+                await interaction.response.edit_message(embed=new_embed, view=self)
         
         return callback
     
     async def execute_enemy_turn(self, interaction: discord.Interaction):
         """Execute the enemy turn with a 10-second delay."""
-        await interaction.followup.send(
-            f"**{self.enemy_name}** is preparing to attack...",
-            ephemeral=False
-        )
-        
         # Wait 10 seconds for enemy turn
         await asyncio.sleep(10)
+        
+        # Add enemy action to battle log
+        self.battle_log.append(f"{self.enemy_name} attacked!")
         
         # Enemy turn complete, switch back to player turn
         self.is_enemy_turn = False
@@ -1129,17 +1150,10 @@ class BattleView(discord.ui.View):
         # Update buttons for first character again
         self.update_ability_buttons()
         
-        first_char = self.get_current_character()
-        first_char_title = characterTitles.get(first_char, first_char)
-        
-        await interaction.followup.send(
-            f"**{self.enemy_name}** attacked! (No implementation yet)\n\nIt's now **{first_char_title}**'s turn again!",
-            ephemeral=False
-        )
-        
-        # Update the original message with new buttons for the first character
+        # Update embed with new state
+        new_embed = self.create_battle_embed()
         try:
-            await interaction.message.edit(view=self)
+            await interaction.message.edit(embed=new_embed, view=self)
         except (discord.HTTPException, discord.NotFound):
             pass  # In case message can't be edited or was deleted
     
@@ -1157,17 +1171,16 @@ class BattleView(discord.ui.View):
         # End the battle
         self.battle_ended = True
         
+        # Add retreat to battle log
+        self.battle_log.append(f"You retreated from the battle against {self.enemy_name}!")
+        
         # Disable all buttons
         for item in self.children:
             item.disabled = True
         
-        await interaction.response.send_message(
-            f"You retreated from the battle against **{self.enemy_name}**!",
-            ephemeral=False
-        )
-        
-        # Update the view to show disabled buttons
-        await interaction.message.edit(view=self)
+        # Update embed with retreat message
+        new_embed = self.create_battle_embed()
+        await interaction.response.edit_message(embed=new_embed, view=self)
         
         # Stop the view
         self.stop()
@@ -1243,21 +1256,13 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
     # Create battle view with interactive buttons
     battle_view = BattleView(team=team, enemy_name=enemies.name, user_id=interaction.user.id)
     
-    # Get first character's name
-    first_char = team[0]
-    first_char_title = characterTitles.get(first_char, first_char)
+    # Create initial battle embed
+    embed = battle_view.create_battle_embed()
     
     # send the combined image as a discord message with interactive buttons
-    embed = discord.Embed(
-        title="Battle Screen", 
-        description=f"You are battling against **{enemies.name}**!\n\nIt's **{first_char_title}**'s turn!", 
-        color=0x3f48cc
-    )
-    embed.set_image(url="attachment://battle_screen.png")
     await interaction.response.send_message(
         file=discord.File(combined_image_path), 
-        embed=embed, 
-        content=f"Battle against **{enemies.name}** initiated!",
+        embed=embed,
         view=battle_view
     )
 
