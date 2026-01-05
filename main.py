@@ -785,6 +785,30 @@ async def team(ctx: discord.Interaction, char1: app_commands.Choice[str] = None,
     # show titles of characters in team
     await ctx.response.send_message("Team Updated Successfully! Your team order is:\n" + "\n".join(team_titles))
 
+# ============================================================================
+# CHARACTER ABILITIES MAPPING
+# ============================================================================
+# Maps character names to their abilities (skills 1, 2, 3, and optional ultimate)
+# Format: character_name: [skill1, skill2, skill3] or [skill1, skill2, skill3, ultimate]
+
+characterAbilities = {
+    "r_abraize": ["Punch", "Sleep", "Missing Assignments"],
+    "r_abraize2": ["Punch", "Eat Note", "Productivity Time"],
+    "sr_abraize": ["Punch", "Slow", "Attempt"],
+    "ssr_abraize": ["Accelerated Punch", "Fast Forward", "Rewind", "Universal Stabilizer"],
+    "r_trey": ["Punch", "Irish Goodbye", "Cheesy Fries"],
+    "sr_trey": ["Punch", "Drowsy", "Whispers from Beyond"],
+    "ssr_trey": ["Punch", "Cloak and Dagger", "Shroud", "Reality Sink"],
+    "r_noah": ["Punch", "Fiddle", "Bo"],
+    "r_freeman": ["Slap", "Ponder", "SMASH!"],
+    "sr_freeman": ["Pistol Whip", "Shoot", "Hide"],
+    "ssr_jayden": ["Punch", "Butler of Swatabi", "Indecision", "Genesis"],
+    "r_stephen": ["Dropkick", "Light up", "Lock the fuck in"],
+    "sr_stephen": ["Dropkick", "Consider Intervening", "HIYAAAHHH!"],
+    "sr_homestuck": ["Impractical Assailants", "Plunder", "Thief"],
+    "ssr_scottie": ["Shield Bash", "Guardian's Shield", "Fortify", "Eternal Watch"],
+}
+
 # Battle Command - PvE
 # The battle screen has 8 total slots, 4 for the player's team and 4 for the enemy team (enemy team does not have to fill all 4 slots)
 # There are multiple enemy types to fight
@@ -973,6 +997,195 @@ def calculate_character_position(char_name, slot_index, background_size):
     return (int(paste_x), int(paste_y))
 
 
+# ============================================================================
+# BATTLE VIEW - Interactive Battle System with Turn Mechanics
+# ============================================================================
+
+class BattleView(discord.ui.View):
+    """
+    Interactive battle view with dynamic ability buttons and turn system.
+    
+    Features:
+    - Dynamic ability buttons that change based on current character
+    - Turn system: players take turns, then enemy turn with 10-second delay
+    - Retreat button to end battle
+    """
+    
+    def __init__(self, team: list, enemy_name: str, user_id: int):
+        super().__init__(timeout=300)  # 5 minute timeout
+        self.team = team
+        self.enemy_name = enemy_name
+        self.user_id = user_id
+        self.current_character_index = 0
+        self.is_enemy_turn = False
+        self.battle_ended = False
+        self.battle_log = []  # Store battle actions for embed updates
+        
+        # Update buttons for the first character
+        self.update_ability_buttons()
+    
+    def get_current_character(self):
+        """Get the currently active character."""
+        if self.current_character_index < len(self.team):
+            return self.team[self.current_character_index]
+        return None
+    
+    def create_battle_embed(self):
+        """Create or update the battle embed with current state."""
+        current_char = self.get_current_character()
+        
+        # Build description with current turn info and battle log
+        if self.battle_ended:
+            description = f"Battle against **{self.enemy_name}** has ended.\n\n"
+        elif self.is_enemy_turn:
+            description = f"**{self.enemy_name}**'s turn!\n\n"
+        elif current_char:
+            char_title = characterTitles.get(current_char, current_char)
+            description = f"It's **{char_title}**'s turn!\n\n"
+        else:
+            description = f"Battle against **{self.enemy_name}**\n\n"
+        
+        # Add recent battle log (last 5 entries)
+        if self.battle_log:
+            description += "**Battle Log:**\n"
+            for log_entry in self.battle_log[-5:]:
+                description += f"• {log_entry}\n"
+        
+        embed = discord.Embed(
+            title="Battle Screen",
+            description=description,
+            color=0x3f48cc
+        )
+        embed.set_image(url="attachment://battle_screen.png")
+        
+        return embed
+    
+    def update_ability_buttons(self):
+        """Update ability buttons based on current character."""
+        # Remove existing ability buttons (keep only retreat button)
+        for item in self.children[:]:
+            if hasattr(item, 'custom_id') and item.custom_id and item.custom_id.startswith('ability_'):
+                self.remove_item(item)
+        
+        if self.battle_ended:
+            return
+        
+        current_char = self.get_current_character()
+        if not current_char:
+            return
+        
+        # Get abilities for current character
+        abilities = characterAbilities.get(current_char, [])
+        
+        # Create buttons for each ability
+        for i, ability_name in enumerate(abilities):
+            button = discord.ui.Button(
+                label=ability_name,
+                style=discord.ButtonStyle.primary,
+                custom_id=f"ability_{i}",
+                row=i // 5  # Discord allows max 5 buttons per row
+            )
+            button.callback = self.create_ability_callback(i, ability_name)
+            self.add_item(button)
+    
+    def create_ability_callback(self, ability_index: int, ability_name: str):
+        """Create a callback function for an ability button."""
+        async def callback(interaction: discord.Interaction):
+            # Check if the user is the battle owner
+            if interaction.user.id != self.user_id:
+                await interaction.response.send_message("This is not your battle!", ephemeral=True)
+                return
+            
+            if self.is_enemy_turn:
+                await interaction.response.send_message("It's the enemy's turn!", ephemeral=True)
+                return
+            
+            if self.battle_ended:
+                await interaction.response.send_message("The battle has ended!", ephemeral=True)
+                return
+            
+            # Get current character
+            current_char = self.get_current_character()
+            char_title = characterTitles.get(current_char, current_char)
+            
+            # Add to battle log
+            self.battle_log.append(f"{char_title} used {ability_name}!")
+            
+            # Move to next character
+            self.current_character_index += 1
+            
+            # Check if all players have gone
+            if self.current_character_index >= len(self.team):
+                # Switch to enemy turn
+                self.is_enemy_turn = True
+                self.battle_log.append(f"All players have acted. {self.enemy_name}'s turn!")
+                
+                # Update embed with new state
+                new_embed = self.create_battle_embed()
+                await interaction.response.edit_message(embed=new_embed, view=self)
+                
+                await self.execute_enemy_turn(interaction)
+            else:
+                # Update buttons for next character
+                self.update_ability_buttons()
+                
+                # Update embed with new state
+                new_embed = self.create_battle_embed()
+                await interaction.response.edit_message(embed=new_embed, view=self)
+        
+        return callback
+    
+    async def execute_enemy_turn(self, interaction: discord.Interaction):
+        """Execute the enemy turn with a 10-second delay."""
+        # Wait 10 seconds for enemy turn
+        await asyncio.sleep(10)
+        
+        # Add enemy action to battle log
+        self.battle_log.append(f"{self.enemy_name} attacked!")
+        
+        # Enemy turn complete, switch back to player turn
+        self.is_enemy_turn = False
+        self.current_character_index = 0
+        
+        # Update buttons for first character again
+        self.update_ability_buttons()
+        
+        # Update embed with new state
+        new_embed = self.create_battle_embed()
+        try:
+            await interaction.message.edit(embed=new_embed, view=self)
+        except (discord.HTTPException, discord.NotFound):
+            pass  # In case message can't be edited or was deleted
+    
+    @discord.ui.button(label="Retreat", style=discord.ButtonStyle.danger, custom_id="retreat_button", row=4)
+    async def retreat_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Retreat button to end the battle."""
+        if interaction.user.id != self.user_id:
+            await interaction.response.send_message("This is not your battle!", ephemeral=True)
+            return
+        
+        if self.battle_ended:
+            await interaction.response.send_message("The battle has already ended!", ephemeral=True)
+            return
+        
+        # End the battle
+        self.battle_ended = True
+        
+        # Add retreat to battle log
+        self.battle_log.append(f"You retreated from the battle against {self.enemy_name}!")
+        
+        # Disable all buttons
+        for item in self.children:
+            item.disabled = True
+        
+        # Update embed with retreat message
+        new_embed = self.create_battle_embed()
+        await interaction.response.edit_message(embed=new_embed, view=self)
+        
+        # Stop the view
+        self.stop()
+
+
 @bot.tree.command(name = "battle")
 @app_commands.choices(enemies=[
     app_commands.Choice(name="Ruffian", value="Ruffian"),
@@ -1039,10 +1252,19 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
     # save the combined image to a new file
     combined_image_path = "./battle_screen.png"
     background_image.save(combined_image_path)
-    # send the combined image as a discord message
-    embed = discord.Embed(title="Battle Screen", description=f"You are battling against **{enemies.name}**!", color=0x3f48cc)
-    embed.set_image(url="attachment://battle_screen.png")
-    await interaction.response.send_message(file=discord.File(combined_image_path), embed=embed, content=f"Battle against **{enemies.name}** initiated!")
+    
+    # Create battle view with interactive buttons
+    battle_view = BattleView(team=team, enemy_name=enemies.name, user_id=interaction.user.id)
+    
+    # Create initial battle embed
+    embed = battle_view.create_battle_embed()
+    
+    # send the combined image as a discord message with interactive buttons
+    await interaction.response.send_message(
+        file=discord.File(combined_image_path), 
+        embed=embed,
+        view=battle_view
+    )
 
 
 HELP_GIF_URL = "https://media.discordapp.net/attachments/796742546910871562/1442307872490000432/JITSTUCKMOBILEGAME.gif?ex=6926efa1&is=69259e21&hm=160f8b3552a36078f4941e02aafbb3408a95be77be4f5ffa6697ff3aacd53397&format=webp&animated=true"
