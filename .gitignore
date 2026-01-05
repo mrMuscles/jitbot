@@ -19,3 +19,6 @@ Thumbs.db
 
 # Token File
 token.env
+
+# Battle File
+battle_screen.png
