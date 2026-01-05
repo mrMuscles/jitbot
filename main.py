@@ -40,6 +40,9 @@ async def on_ready():
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="Gacha Game"))
     print("teeesst")
 
+    # Change inBattle to false for all users on bot startup
+    inventory_collection.update_many({}, {"$set": {"inBattle": False}})
+
     # Add all users from all guilds to MongoDB
     for guild in bot.guilds:
         for member in guild.members:
@@ -52,7 +55,7 @@ async def on_ready():
                     "inventory": {},
                     "rolls": 10,  # Starting rolls,
                     "counter": 0,
-                    "team": []
+                    "team": [],
                 }
                 # Use upsert to avoid duplicates
                 inventory_collection.update_one(
@@ -928,10 +931,10 @@ characterFloatingOffset = {
 # Format: (x, y) - coordinates on the background where feet touch the ground
 # Note: These use 0-based indexing (slot_index 0-3 in code)
 teamSlotGroundPositions = [
-    (500, 400),  # Index 0 (Slot 1 in /viewteam) - front right
-    (380, 380),  # Index 1 (Slot 2 in /viewteam) - middle right
-    (580, 360),  # Index 2 (Slot 3 in /viewteam) - back right
-    (460, 340),  # Index 3 (Slot 4 in /viewteam) - far back
+    (470, 450),  # Index 0 (Slot 1 in /viewteam) - Down
+    (360, 380),  # Index 1 (Slot 2 in /viewteam) - Left
+    (580, 360),  # Index 2 (Slot 3 in /viewteam) - Right
+    (440, 340),  # Index 3 (Slot 4 in /viewteam) - Up
 ]
 
 def calculate_character_position(char_name, slot_index, background_size):
@@ -1211,7 +1214,6 @@ class BattleView(discord.ui.View):
 
         # Call parent's on_timeout if it exists
         await super().on_timeout()
-
 
 @bot.tree.command(name = "battle")
 @app_commands.choices(enemies=[
