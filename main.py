@@ -1001,6 +1001,80 @@ def calculate_character_position(char_name, slot_index, background_size):
 
 
 # ============================================================================
+# BATTLE STATE AND COMBAT CALCULATIONS
+# ============================================================================
+
+def parse_percentage_stat(value) -> float:
+    """Parse a percentage stat (e.g., '90%' or 0.90) to a float."""
+    if isinstance(value, str):
+        return float(value.rstrip('%')) / 100
+    return float(value)
+
+def get_character_rarity_multiplier(char_name: str) -> float:
+    """Get the rarity multiplier for a character (R=1, SR=1.5, SSR=2)."""
+    if char_name in ssrChar or char_name in specialChar:
+        return 2.0
+    elif char_name in srChar:
+        return 1.5
+    elif char_name in rChar:
+        return 1.0
+    return 1.0
+
+def get_character_attributes(char_name: str) -> dict:
+    """Get base attributes for a character."""
+    # Map character names to their attribute arrays
+    char_attr_map = {
+        "r_abraize": r_abraizeAttributes,
+        "r_abraize2": r_abraize2Attributes,
+        "sr_abraize": sr_abraizeAttributes,
+        "ssr_abraize": ssr_abraizeAttributes,
+        "r_trey": r_treyAttributes,
+        "sr_trey": sr_treyAttributes,
+        "ssr_trey": ssr_treyAttributes,
+        "r_noah": r_noahAttributes,
+        "r_freeman": r_freemanAttributes,
+        "sr_freeman": sr_freemanAttributes,
+        "ssr_jayden": ssr_jaydenAttributes,
+        "r_stephen": r_stephenAttributes,
+        "sr_stephen": sr_stephenAttributes,
+        "sr_homestuck": sr_homestuckAttributes,
+        "ssr_scottie": ssr_scottieAttributes,
+    }
+    
+    attrs = char_attr_map.get(char_name, [200, 10, 10, "3%", "90%"])
+    return {
+        "hp": attrs[0],
+        "atk": attrs[1],
+        "def": attrs[2],
+        "eva": parse_percentage_stat(attrs[3]),
+        "acc": parse_percentage_stat(attrs[4]),
+    }
+
+def calculate_ehp(hp: int, defense: int, rarity_multiplier: float) -> int:
+    """Calculate Effective Health Points (EHP = HP + DEF * Rarity)."""
+    return hp + int(defense * rarity_multiplier)
+
+def calculate_displayed_hp(current_ehp: int, total_ehp: int, total_hp: int) -> int:
+    """Calculate displayed HP from current EHP."""
+    if total_ehp <= 0:
+        return 0
+    ratio = current_ehp / total_ehp
+    displayed_hp = ratio * total_hp
+    return max(0, int(displayed_hp + 0.5))  # Round up
+
+def apply_damage_to_ehp(current_ehp: int, damage: int) -> int:
+    """Apply damage to EHP and return new EHP."""
+    return max(0, current_ehp - damage)
+
+def roll_accuracy(accuracy: float) -> bool:
+    """Roll for accuracy. Returns True if attack hits."""
+    return random.random() < accuracy
+
+def roll_evasion(evasion: float) -> bool:
+    """Roll for evasion. Returns True if attack is dodged."""
+    return random.random() < evasion
+
+# ============================================================================
 # BATTLE VIEW - Interactive Battle System with Turn Mechanics
 # ============================================================================
 
@@ -1012,9 +1086,11 @@ class BattleView(discord.ui.View):
     - Dynamic ability buttons that change based on current character
     - Turn system: players take turns, then enemy turn with 10-second delay
     - Retreat button to end battle
+    - Full combat calculations with HP, DEF, ATK, EVA, ACC
+    - Buff/debuff tracking system
     """
 
-    def __init__(self, team: list, enemy_name: str, user_id: int):
+    def __init__(self, team: list, enemy_name: str, user_id: int, enemy_count: int = 1):
         super().__init__(timeout=300)  # 5 minute timeout
         self.team = team
         self.enemy_name = enemy_name
@@ -1023,15 +1099,105 @@ class BattleView(discord.ui.View):
         self.is_enemy_turn = False
         self.battle_ended = False
         self.battle_log = []  # Store battle actions for embed updates
+        self.enemy_count = enemy_count  # Number of enemies (1 or 2 for Ruffian)
+        
+        # Initialize player states
+        self.player_states = {}
+        for char_name in team:
+            attrs = get_character_attributes(char_name)
+            rarity_mult = get_character_rarity_multiplier(char_name)
+            total_ehp = calculate_ehp(attrs["hp"], attrs["def"], rarity_mult)
+            
+            self.player_states[char_name] = {
+                "base_hp": attrs["hp"],
+                "base_atk": attrs["atk"],
+                "base_def": attrs["def"],
+                "base_eva": attrs["eva"],
+                "base_acc": attrs["acc"],
+                "current_ehp": total_ehp,
+                "total_ehp": total_ehp,
+                "rarity_mult": rarity_mult,
+                "is_alive": True,
+                "buffs": {},  # {buff_name: {value: float, duration: int}}
+                "debuffs": {},  # {debuff_name: {value: float, duration: int}}
+            }
+        
+        # Initialize enemy states
+        self.enemy_states = []
+        enemy_attrs = enemyAttributes.get(enemy_name, [175, 5, 5, "0%", "80%", "Punch"])  # Default with at least one ability
+        for i in range(enemy_count):
+            enemy_hp = enemy_attrs[0]
+            enemy_id = f"{enemy_name}_{i}"
+            # Safely get abilities (everything after index 4)
+            enemy_abilities = enemy_attrs[5:] if len(enemy_attrs) > 5 else ["Punch"]
+            self.enemy_states.append({
+                "id": enemy_id,
+                "name": enemy_name,
+                "base_hp": enemy_hp,
+                "base_atk": enemy_attrs[1],
+                "base_def": enemy_attrs[2],
+                "base_eva": parse_percentage_stat(enemy_attrs[3]),
+                "base_acc": parse_percentage_stat(enemy_attrs[4]),
+                "current_hp": enemy_hp,
+                "total_hp": enemy_hp,
+                "is_alive": True,
+                "buffs": {},
+                "debuffs": {},
+                "abilities": enemy_abilities,
+            })
 
         # Update buttons for the first character
         self.update_ability_buttons()
 
     def get_current_character(self):
         """Get the currently active character."""
-        if self.current_character_index < len(self.team):
-            return self.team[self.current_character_index]
+        # Skip dead characters
+        while self.current_character_index < len(self.team):
+            char = self.team[self.current_character_index]
+            if self.player_states[char]["is_alive"]:
+                return char
+            self.current_character_index += 1
         return None
+
+    def get_alive_players(self):
+        """Get list of alive players."""
+        return [char for char in self.team if self.player_states[char]["is_alive"]]
+    
+    def get_alive_enemies(self):
+        """Get list of alive enemies."""
+        return [enemy for enemy in self.enemy_states if enemy["is_alive"]]
+
+    def create_hp_display(self):
+        """Create HP display text for all characters."""
+        hp_lines = []
+        
+        # Player HP
+        hp_lines.append("**Players:**")
+        for char_name in self.team:
+            state = self.player_states[char_name]
+            if state["is_alive"]:
+                displayed_hp = calculate_displayed_hp(
+                    state["current_ehp"],
+                    state["total_ehp"],
+                    state["base_hp"]
+                )
+                char_title = characterTitles.get(char_name, char_name)
+                hp_lines.append(f"{char_title}: {displayed_hp}/{state['base_hp']} HP")
+            else:
+                char_title = characterTitles.get(char_name, char_name)
+                hp_lines.append(f"{char_title}: ☠️ DEAD")
+        
+        # Enemy HP
+        hp_lines.append("\n**Enemies:**")
+        for enemy in self.enemy_states:
+            if enemy["is_alive"]:
+                enemy_name = enemy["name"] if self.enemy_count == 1 else f"{enemy['name']} {enemy['id'].split('_')[1]}"
+                hp_lines.append(f"{enemy_name}: {enemy['current_hp']}/{enemy['total_hp']} HP")
+            else:
+                enemy_name = enemy["name"] if self.enemy_count == 1 else f"{enemy['name']} {enemy['id'].split('_')[1]}"
+                hp_lines.append(f"{enemy_name}: ☠️ DEAD")
+        
+        return "\n".join(hp_lines)
 
     def create_battle_embed(self):
         """Create or update the battle embed with current state."""
@@ -1060,6 +1226,10 @@ class BattleView(discord.ui.View):
             color=0x3f48cc
         )
         embed.set_image(url="attachment://battle_screen.png")
+        
+        # Add HP display as a field
+        hp_display = self.create_hp_display()
+        embed.add_field(name="HP Status", value=hp_display, inline=False)
 
         return embed
 
@@ -1114,10 +1284,17 @@ class BattleView(discord.ui.View):
             # Add to battle log
             self.battle_log.append(f"{char_title} used {ability_name}!")
 
-            # Move to next character
+            # Move to next character (skip dead ones)
             self.current_character_index += 1
+            
+            # Skip dead characters
+            while self.current_character_index < len(self.team):
+                next_char = self.team[self.current_character_index]
+                if self.player_states[next_char]["is_alive"]:
+                    break
+                self.current_character_index += 1
 
-            # Check if all players have gone
+            # Check if all alive players have gone
             if self.current_character_index >= len(self.team):
                 # Switch to enemy turn
                 self.is_enemy_turn = True
@@ -1150,20 +1327,242 @@ class BattleView(discord.ui.View):
         if self.battle_ended:
             return
 
-        # Add enemy action to battle log
-        self.battle_log.append(f"{self.enemy_name} attacked!")
+        # Process each alive enemy's turn
+        alive_enemies = self.get_alive_enemies()
+        for enemy in alive_enemies:
+            if self.battle_ended:
+                break
+                
+            # Choose random ability (exclude passive descriptions)
+            # Safely filter only string abilities that don't start with "Extra Passive"
+            abilities = [a for a in enemy["abilities"] if isinstance(a, str) and not a.startswith("Extra Passive")]
+            if not abilities:
+                continue
+                
+            chosen_ability = random.choice(abilities)
+            
+            # Parse ability to check if it's AOE or single target
+            is_aoe = "all party" in chosen_ability.lower() or "all allies" in chosen_ability.lower()
+            
+            # Get target(s)
+            alive_players = self.get_alive_players()
+            if not alive_players:
+                break
+            
+            if is_aoe:
+                targets = alive_players
+            else:
+                targets = [random.choice(alive_players)]
+            
+            # Execute attack on each target
+            for target_char in targets:
+                # Get enemy's effective stats (with buffs/debuffs)
+                enemy_acc = enemy["base_acc"]
+                enemy_atk = enemy["base_atk"]
+                
+                # Apply buffs/debuffs to accuracy and attack
+                for buff_name, buff_data in enemy["buffs"].items():
+                    if "acc" in buff_name.lower():
+                        enemy_acc += buff_data["value"]
+                    elif "atk" in buff_name.lower():
+                        enemy_atk = int(enemy_atk * (1 + buff_data["value"]))
+                
+                for debuff_name, debuff_data in enemy["debuffs"].items():
+                    if "acc" in debuff_name.lower():
+                        enemy_acc -= debuff_data["value"]
+                    elif "atk" in debuff_name.lower():
+                        enemy_atk = int(enemy_atk * (1 - debuff_data["value"]))
+                
+                # Roll for accuracy
+                if not roll_accuracy(enemy_acc):
+                    enemy_name = enemy["name"] if self.enemy_count == 1 else f"{enemy['name']} {enemy['id'].split('_')[1]}"
+                    char_title = characterTitles.get(target_char, target_char)
+                    self.battle_log.append(f"{enemy_name}'s attack missed {char_title}!")
+                    continue
+                
+                # Roll for evasion
+                target_state = self.player_states[target_char]
+                target_eva = target_state["base_eva"]
+                
+                # Apply buffs/debuffs to evasion
+                for buff_name, buff_data in target_state["buffs"].items():
+                    if "eva" in buff_name.lower():
+                        target_eva += buff_data["value"]
+                
+                for debuff_name, debuff_data in target_state["debuffs"].items():
+                    if "eva" in debuff_name.lower():
+                        target_eva -= debuff_data["value"]
+                
+                if roll_evasion(target_eva):
+                    enemy_name = enemy["name"] if self.enemy_count == 1 else f"{enemy['name']} {enemy['id'].split('_')[1]}"
+                    char_title = characterTitles.get(target_char, target_char)
+                    self.battle_log.append(f"{char_title} dodged {enemy_name}'s attack!")
+                    continue
+                
+                # Apply damage
+                damage = enemy_atk
+                target_state["current_ehp"] = apply_damage_to_ehp(target_state["current_ehp"], damage)
+                
+                # Calculate displayed HP
+                displayed_hp = calculate_displayed_hp(
+                    target_state["current_ehp"],
+                    target_state["total_ehp"],
+                    target_state["base_hp"]
+                )
+                
+                enemy_name = enemy["name"] if self.enemy_count == 1 else f"{enemy['name']} {enemy['id'].split('_')[1]}"
+                char_title = characterTitles.get(target_char, target_char)
+                self.battle_log.append(f"{enemy_name} hit {char_title} for {damage} damage! ({displayed_hp} HP remaining)")
+                
+                # Check if player died
+                if target_state["current_ehp"] <= 0:
+                    target_state["is_alive"] = False
+                    self.battle_log.append(f"💀 {char_title} has fallen in battle!")
+                    
+                    # Regenerate battle screen without dead player and update message
+                    await self.regenerate_battle_screen(interaction)
+        
+        # Decrement buff/debuff durations and remove expired ones
+        self.update_buff_debuff_durations()
+        
+        # Check if all players are dead
+        if not self.get_alive_players():
+            self.battle_ended = True
+            self.battle_log.append(f"💀 All players have fallen! {self.enemy_name} wins!")
+            
+            # Disable all buttons
+            for item in self.children:
+                item.disabled = True
+            
+            # Update embed with loss message
+            new_embed = self.create_battle_embed()
+            try:
+                await interaction.message.edit(embed=new_embed, view=self)
+            except (discord.HTTPException, discord.NotFound):
+                pass
+            
+            # Set user as no longer in battle
+            inventory_collection.update_one(
+                {"user_id": self.user_id},
+                {"$set": {"inBattle": False}}
+            )
+            
+            self.stop()
+            return
 
         # Enemy turn complete, switch back to player turn
         self.is_enemy_turn = False
         self.current_character_index = 0
+        
+        # Skip to first alive character
+        while self.current_character_index < len(self.team):
+            char = self.team[self.current_character_index]
+            if self.player_states[char]["is_alive"]:
+                break
+            self.current_character_index += 1
 
-        # Update buttons for first character again
+        # Update buttons for first alive character
         self.update_ability_buttons()
 
         # Update embed with new state
         new_embed = self.create_battle_embed()
         try:
             await interaction.message.edit(embed=new_embed, view=self)
+        except (discord.HTTPException, discord.NotFound):
+            pass  # In case message can't be edited or was deleted
+
+    def update_buff_debuff_durations(self):
+        """Decrement buff/debuff durations and remove expired ones."""
+        # Update player buffs/debuffs
+        for char_name in self.team:
+            state = self.player_states[char_name]
+            
+            # Update buffs
+            expired_buffs = []
+            for buff_name, buff_data in state["buffs"].items():
+                buff_data["duration"] -= 1
+                if buff_data["duration"] <= 0:
+                    expired_buffs.append(buff_name)
+            for buff_name in expired_buffs:
+                del state["buffs"][buff_name]
+            
+            # Update debuffs
+            expired_debuffs = []
+            for debuff_name, debuff_data in state["debuffs"].items():
+                debuff_data["duration"] -= 1
+                if debuff_data["duration"] <= 0:
+                    expired_debuffs.append(debuff_name)
+            for debuff_name in expired_debuffs:
+                del state["debuffs"][debuff_name]
+        
+        # Update enemy buffs/debuffs
+        for enemy in self.enemy_states:
+            # Update buffs
+            expired_buffs = []
+            for buff_name, buff_data in enemy["buffs"].items():
+                buff_data["duration"] -= 1
+                if buff_data["duration"] <= 0:
+                    expired_buffs.append(buff_name)
+            for buff_name in expired_buffs:
+                del enemy["buffs"][buff_name]
+            
+            # Update debuffs
+            expired_debuffs = []
+            for debuff_name, debuff_data in enemy["debuffs"].items():
+                debuff_data["duration"] -= 1
+                if debuff_data["duration"] <= 0:
+                    expired_debuffs.append(debuff_name)
+            for debuff_name in expired_debuffs:
+                del enemy["debuffs"][debuff_name]
+    
+    async def regenerate_battle_screen(self, interaction: discord.Interaction):
+        """Regenerate battle screen image with current alive characters and update Discord message."""
+        # Get alive players
+        alive_players = self.get_alive_players()
+        alive_enemies = self.get_alive_enemies()
+        
+        # Get a random background
+        background_name, background_file = random.choice(list(backgrounds.items()))
+        background_image = Image.open(background_file)
+        background_size = background_image.size
+        
+        # Place enemies (only alive ones)
+        if self.enemy_name == "Ruffian":
+            if len(alive_enemies) == 2:
+                ruffianB = Image.open(enemyImages["RuffianBack"])
+                ruffianF = Image.open(enemyImages["RuffianFront"])
+                background_image.paste(ruffianB, enemySpots["RuffianBack"], ruffianB)
+                background_image.paste(ruffianF, enemySpots["RuffianFront"], ruffianF)
+            elif len(alive_enemies) == 1:
+                ruffianB = Image.open(enemyImages["RuffianBack"])
+                background_image.paste(ruffianB, enemySpots["RuffianSolo"], ruffianB)
+        elif alive_enemies:
+            enemy_image = Image.open(enemyImages[self.enemy_name])
+            background_image.paste(enemy_image, enemySpots[self.enemy_name], enemy_image)
+        
+        # Place team characters (only alive ones)
+        # We need to maintain original slot positions
+        for i, char_name in reversed(list(enumerate(self.team))):
+            if self.player_states[char_name]["is_alive"]:
+                if char_name in characterImages:
+                    char_image_path = characterImages[char_name]
+                    if os.path.exists(char_image_path):
+                        char_image = Image.open(char_image_path)
+                        char_position = calculate_character_position(char_name, i, background_size)
+                        background_image.paste(char_image, char_position, char_image)
+        
+        # Save the combined image
+        combined_image_path = "./battle_screen.png"
+        background_image.save(combined_image_path)
+        
+        # Update the Discord message with the new image
+        new_embed = self.create_battle_embed()
+        try:
+            await interaction.message.edit(
+                embed=new_embed,
+                attachments=[discord.File(combined_image_path)],
+                view=self
+            )
         except (discord.HTTPException, discord.NotFound):
             pass  # In case message can't be edited or was deleted
 
@@ -1249,13 +1648,15 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
     background_size = background_image.size
 
     # Place enemies first (in the background layer)
+    enemy_count = 1  # Default to 1 enemy
     if enemies.name == "Grunt":
         enemy_image = Image.open(enemyImages[enemies.name])
         background_image.paste(enemy_image, enemySpots[enemies.name], enemy_image)
     elif enemies.name == "Ruffian":
-        # 80/20 if 2 or 1 ruffians show up
+        # 50/50 if 2 or 1 ruffians show up
         roll = random.random()
         if roll < 0.5:
+            enemy_count = 2
             ruffianB = Image.open(enemyImages["RuffianBack"])
             ruffianF = Image.open(enemyImages["RuffianFront"])
             background_image.paste(ruffianB, enemySpots["RuffianBack"], ruffianB)
@@ -1288,7 +1689,7 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
     background_image.save(combined_image_path)
 
     # Create battle view with interactive buttons
-    battle_view = BattleView(team=team, enemy_name=enemies.name, user_id=interaction.user.id)
+    battle_view = BattleView(team=team, enemy_name=enemies.name, user_id=interaction.user.id, enemy_count=enemy_count)
 
     # Create initial battle embed
     embed = battle_view.create_battle_embed()
