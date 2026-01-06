@@ -1419,8 +1419,8 @@ class BattleView(discord.ui.View):
                     target_state["is_alive"] = False
                     self.battle_log.append(f"💀 {char_title} has fallen in battle!")
                     
-                    # Regenerate battle screen without dead player
-                    await self.regenerate_battle_screen()
+                    # Regenerate battle screen without dead player and update message
+                    await self.regenerate_battle_screen(interaction)
         
         # Decrement buff/debuff durations and remove expired ones
         self.update_buff_debuff_durations()
@@ -1515,8 +1515,8 @@ class BattleView(discord.ui.View):
             for debuff_name in expired_debuffs:
                 del enemy["debuffs"][debuff_name]
     
-    async def regenerate_battle_screen(self):
-        """Regenerate battle screen image with current alive characters."""
+    async def regenerate_battle_screen(self, interaction: discord.Interaction):
+        """Regenerate battle screen image with current alive characters and update Discord message."""
         # Get alive players
         alive_players = self.get_alive_players()
         alive_enemies = self.get_alive_enemies()
@@ -1554,6 +1554,17 @@ class BattleView(discord.ui.View):
         # Save the combined image
         combined_image_path = "./battle_screen.png"
         background_image.save(combined_image_path)
+        
+        # Update the Discord message with the new image
+        new_embed = self.create_battle_embed()
+        try:
+            await interaction.message.edit(
+                embed=new_embed,
+                attachments=[discord.File(combined_image_path)],
+                view=self
+            )
+        except (discord.HTTPException, discord.NotFound):
+            pass  # In case message can't be edited or was deleted
 
     @discord.ui.button(label="Retreat", style=discord.ButtonStyle.danger, custom_id="retreat_button", row=4)
     async def retreat_button(self, interaction: discord.Interaction, button: discord.ui.Button):
