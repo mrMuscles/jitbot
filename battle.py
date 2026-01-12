@@ -104,14 +104,11 @@ def advanceBattle(discordID, abilityUsed):
     print("Enemy turn, no abilities to return")
     # skip over and go to enemy logic
     enemyTurn(discordID)
-    return None
+    # after enemy turn is done it will return the next player character abilities
+    return teamAbilities[discordID]['players'][whosTurn[discordID]]
   else:
     print("Next turn is for", whosTurn[discordID])
-    print("ERR1", teamAbilities)
-    print("ERR2", turnOrder)
-    print("ERR3", whosTurn)
-    print("ERR4", teamAbilities[discordID]['players'][whosTurn[discordID]])
-    return teamAbilities[discordID]['players'][whosTurn[discordID]]
+  return teamAbilities[discordID]['players'][whosTurn[discordID]]
 
 
 def enemyTurn(discordID):

@@ -1791,9 +1791,6 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
                     nextCharacter = advanceBattle(interaction.user.id, ability_index)
                     print("NEXT CHARACTER", nextCharacter)
 
-                    if nextCharacter is None:
-                        return
-
                     self.build_ability_buttons(nextCharacter)
                     await interaction.edit_original_response(view=self)
 
