@@ -8,6 +8,9 @@ import random
 from collections import Counter
 from PIL import Image
 from dotenv import load_dotenv
+
+from battle import *
+
 load_dotenv("token.env")
 
 MONGO_URI = "mongodb://localhost:27017"
@@ -1683,6 +1686,10 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
         enemy_image = Image.open(enemyImages[enemies.name])
         background_image.paste(enemy_image, enemySpots[enemies.name], enemy_image)
 
+    enemyList = []
+    for _ in range(enemy_count):
+        enemyList.append(enemies.name)
+
     # Place team characters dynamically based on their feet positions
     # Reverse order so slot 1 (index 0) is pasted last and appears on top
     for i, char_name in reversed(list(enumerate(team))):
@@ -1703,8 +1710,32 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
         color=0x3f48cc
     )
     embed.set_image(url="attachment://battle_screen.png")
-    await interaction.response.send_message(file=discord.File(combined_image_path), embed=embed)
 
+    startBattle(interaction.user.id, team, enemyList)
+
+    # it seems that you need to have a "view" to allow buttons
+    class battleView(discord.ui.View):
+        def __init__(self, user_id: int):
+            super().__init__()
+            self.user_id = user_id
+
+        @discord.ui.button(label="Retreat", style=discord.ButtonStyle.danger, custom_id="retreat_button")
+        async def retreat_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+            """Retreat button to end the battle."""
+            if interaction.user.id != self.user_id:
+                await interaction.response.send_message("This is not your battle!", ephemeral=True)
+                return
+
+            # End the battle
+            endBattle(interaction.user.id, 0)
+
+            # Disable button after retreating
+            button.disabled = True
+            await interaction.response.edit_message(view=self)
+            await interaction.followup.send("You have retreated from the battle like a baby")
+
+    battle_view = battleView(interaction.user.id)
+    await interaction.response.send_message(file=discord.File(combined_image_path), embed=embed, view=battle_view)
 
 
 '''
