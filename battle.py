@@ -97,14 +97,20 @@ def advanceBattle(discordID, abilityUsed):
   # then it will return the abilities for the next character in the turn order
  # whosTurn[discordID] = turnOrder[discordID][+1]
   # get abilties for next character
-  currentIndex = turnOrder[discordID].index(whosTurn[discordID])
-  whosTurn[discordID] = turnOrder[discordID][currentIndex + 1]
+  if abilityUsed is not None:
+    currentIndex = turnOrder[discordID].index(whosTurn[discordID])
+    whosTurn[discordID] = turnOrder[discordID][currentIndex + 1]
   if whosTurn[discordID] == "0":
     print("Enemy turn, no abilities to return")
     # skip over and go to enemy logic
     enemyTurn(discordID)
+    return None
   else:
     print("Next turn is for", whosTurn[discordID])
+    print("ERR1", teamAbilities)
+    print("ERR2", turnOrder)
+    print("ERR3", whosTurn)
+    print("ERR4", teamAbilities[discordID]['players'][whosTurn[discordID]])
     return teamAbilities[discordID]['players'][whosTurn[discordID]]
 
 
@@ -116,6 +122,7 @@ def enemyTurn(discordID):
   # reset back to the beginning of turn order because enemy turn is now over (temp code)
   whosTurn[discordID] = turnOrder[discordID][0]
   print("Next turn is for", whosTurn[discordID])
+  #advanceBattle(discordID, None)
 
 
 

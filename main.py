@@ -88,8 +88,6 @@ ssrChar = ["ssr_abraize", "ssr_trey", "ssr_jayden"]
 specialChar = ["ssr_scottie"]
 secretChar = ["sssr_max"]
 
-#characters = [rChar, srChar, ssrChar]
-
 characterTitles = {
     "r_abraize": "[Rolling in Success] Abraize Masood",
     "r_abraize2": "[Productivity Time] Abraize Masood",
@@ -110,7 +108,7 @@ characterTitles = {
 }
 
 # Create all character choices for autocomplete
-all_characters = rChar + srChar + ssrChar + specialChar# + secretChar
+all_characters = rChar + srChar + ssrChar + specialChar + secretChar
 character_choices = [
     app_commands.Choice(name=characterTitles[char], value=char)
     for char in all_characters
@@ -131,7 +129,7 @@ SR_STEPHEN_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1
 SSR_JAYDEN_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1441662516672331836/SSR_JAYDEN.gif?ex=692a8558&is=692933d8&hm=c5f5376d3603ce635598548977465872e7a3662802986c6f742c1f590eadd7a4&=&width=813&height=524"
 SR_HOMESTUCK_GIF = "https://media.discordapp.net/attachments/907662210619289600/1441689825911505026/SR_HOMESTUCK.gif?ex=6941b107&is=69405f87&hm=181544c05734a721ea53bbe630dcb4b25ed7b95327661a807b97bdba81cc7506&=&width=813&height=524"
 SSR_SCOTTIE_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1441591428042985492/SSR_SCOTTIE.gif?ex=69551be3&is=6953ca63&hm=9a1141a0f327f2f16ed80b996243679e62491b0fa2b985babdc1bc09d82cccaa&=&width=813&height=524"
-SSSR_MAX_GIF = "???"
+SSSR_MAX_GIF = "https://media.discordapp.net/attachments/1442548563879133357/1460374051834040505/000.png?ex=6966aed2&is=69655d52&hm=2daa8e27abbb1eae7996c33f6b705308567264b3bbaa4bfaa9c889ca95c4e244&=&format=webp&quality=lossless&width=1240&height=698"
 RECYCLE_GIF = "https://media.discordapp.net/attachments/796742546910871562/1455728132240703593/recycled_B.gif?ex=6955c7f8&is=69547678&hm=a047b1b23feab6ea79f4c79303bd9ee6bfba8ba9b800813754e05b9615529585&=&width=678&height=438"
 
 # Use abraizeEmbed as example for other characters
@@ -359,7 +357,7 @@ def ssr_scottieEmbed():
 sssr_maxAttributes = ["?", "??", "???", "????", "?????", "?", "?", "?", "?"]
 def sssr_maxEmbed():
     embed = discord.Embed(title=f"[???]", description="???", color=0x000000)
-  #  embed.set_image(url=SSSR_MAX_GIF)
+    embed.set_image(url=SSSR_MAX_GIF)
     embed.add_field(name="HP:", value=sssr_maxAttributes[0], inline=True)
     embed.add_field(name="ATK:", value=sssr_maxAttributes[1], inline=True)
     embed.add_field(name="DEF:", value=sssr_maxAttributes[2], inline=True)
@@ -573,7 +571,7 @@ async def inventory(ctx):
 @app_commands.choices(character_name=character_choices)
 async def char(interaction: discord.Interaction, character_name: app_commands.Choice[str]):
     """Show Character Info"""
-
+    yesMax = False
     # Get the character dev name from the choice value
     char_dev_name = character_name.value
 
@@ -1789,10 +1787,15 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
                         await interaction.response.send_message("This is not your battle!", ephemeral=True)
                         return
                     await interaction.response.defer()
-                    nextCharacter = advanceBattle(interaction.user.id, ability_index)
 
-                   # self.build_ability_buttons(nextCharacter)
-                   # await interaction.edit_original_response(view=self)
+                    nextCharacter = advanceBattle(interaction.user.id, ability_index)
+                    print("NEXT CHARACTER", nextCharacter)
+
+                    if nextCharacter is None:
+                        return
+
+                    self.build_ability_buttons(nextCharacter)
+                    await interaction.edit_original_response(view=self)
 
                 button.callback = ability_callback
                 self.add_item(button)
