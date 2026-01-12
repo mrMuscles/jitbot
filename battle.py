@@ -63,17 +63,69 @@ enemyAbilities = {
   }
 }
 
+# Store global variable of turn order based on discord id so that battles dont get mixed up between users at same time
+turnOrder = {}
+whosTurn = {}
+teamAbilities = {}
+
 def startBattle(discordID, team, enemies):
   print("Battle Started with user", discordID)
-  getAllAbilities(discordID, team, enemies)
-  turnOrder = calculateTurnOrder(discordID, team, enemies)
-  print("Turn order is:", turnOrder)
+  teamAbilities[discordID] = getAllAbilities(discordID, team, enemies)
+  turnOrder[discordID] = calculateTurnOrder(discordID, team, enemies)
+  for member in team:
+    print(f"Team member {member} abilities: {teamAbilities[discordID]['players'][member]}")
+  for enemy in enemies:
+    print(f"Enemy {enemy} abilities: {teamAbilities[discordID]['enemies'][enemy]}")
 
-  print("battle process finished for user", discordID)
+  print("Turn order is:", turnOrder)
+  print("DiscordID turn order is", turnOrder[discordID])
+  whosTurn[discordID] = turnOrder[discordID][0]
+
+  print("Battle Start Configuration Finished", discordID)
+  # should return character abilities from characterattributes for first character on team
+  return teamAbilities[discordID]['players'][whosTurn[discordID]]
+
+def advanceBattle(discordID, abilityUsed):
+  # once everything with configuration is finished then startBattle will end and return with first character on team abilities
+  # then if any button is pressed from main.py that isnt retreat it should call advanceBattle
+  # it will advance the battle for the discordID and for the abiliyUsed (0 = Ab1 up to 2 and leave for 3 to be possible for ult)
+  # then it will do all the calculations and it will update all the stored data for that battle (hp) (in future buff/debuff)
+  print("Ability used was:", abilityUsed)
+  print("Current turn is:", whosTurn[discordID])
+  # do math here
+ # print("Advancing battle for user", discordID)
+  # then it will return the abilities for the next character in the turn order
+ # whosTurn[discordID] = turnOrder[discordID][+1]
+  # get abilties for next character
+  currentIndex = turnOrder[discordID].index(whosTurn[discordID])
+  whosTurn[discordID] = turnOrder[discordID][currentIndex + 1]
+  if whosTurn[discordID] == "0":
+    print("Enemy turn, no abilities to return")
+    # skip over and go to enemy logic
+    enemyTurn(discordID)
+  else:
+    print("Next turn is for", whosTurn[discordID])
+    return teamAbilities[discordID]['players'][whosTurn[discordID]]
+
+
+def enemyTurn(discordID):
+  # nothing yet
+  print("Enemy turn for user", discordID)
+  # do enemy logic here
+ # print("Enemy logic happened for user", discordID)
+  # reset back to the beginning of turn order because enemy turn is now over (temp code)
+  whosTurn[discordID] = turnOrder[discordID][0]
+  print("Next turn is for", whosTurn[discordID])
+
+
 
 def getAllAbilities(discordID, team, enemies):
   print("Getting abilities for players and enemies in battle of user", discordID)
-
+  allAbilities = {
+    "players": {team[i]: characterAbilities[team[i].lower()] for i in range(len(team))},
+    "enemies": {enemies[i]: enemyAbilities[enemies[i]] for i in range(len(enemies))}
+  }
+  return allAbilities
   # return dictionary like this for when called by startBattle
   # allAbilities:
   #  {

@@ -8,6 +8,7 @@ import random
 from collections import Counter
 from PIL import Image
 from dotenv import load_dotenv
+import time
 
 from battle import *
 
@@ -85,8 +86,9 @@ rChar = ["r_abraize", "r_abraize2", "r_trey", "r_noah", "r_freeman", "r_stephen"
 srChar = ["sr_freeman", "sr_stephen", "sr_homestuck", "sr_abraize", "sr_trey"]
 ssrChar = ["ssr_abraize", "ssr_trey", "ssr_jayden"]
 specialChar = ["ssr_scottie"]
+secretChar = ["sssr_max"]
 
-characters = [rChar, srChar, ssrChar]
+#characters = [rChar, srChar, ssrChar]
 
 characterTitles = {
     "r_abraize": "[Rolling in Success] Abraize Masood",
@@ -103,11 +105,12 @@ characterTitles = {
     "sr_stephen": "[Master of Intervention] Stephen Goraynov",
     "ssr_jayden": "[Sworn Protectorate of Creation] Jayden Ceballos",
     "sr_homestuck": "[Thief in God's Clothing] Homestuck",
-    "ssr_scottie": "[Eternal Guardian] Scottie Jenkins"
+    "ssr_scottie": "[Eternal Guardian] Scottie Jenkins",
+    "sssr_max": "[???] ???"
 }
 
 # Create all character choices for autocomplete
-all_characters = rChar + srChar + ssrChar + specialChar
+all_characters = rChar + srChar + ssrChar + specialChar# + secretChar
 character_choices = [
     app_commands.Choice(name=characterTitles[char], value=char)
     for char in all_characters
@@ -128,6 +131,7 @@ SR_STEPHEN_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1
 SSR_JAYDEN_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1441662516672331836/SSR_JAYDEN.gif?ex=692a8558&is=692933d8&hm=c5f5376d3603ce635598548977465872e7a3662802986c6f742c1f590eadd7a4&=&width=813&height=524"
 SR_HOMESTUCK_GIF = "https://media.discordapp.net/attachments/907662210619289600/1441689825911505026/SR_HOMESTUCK.gif?ex=6941b107&is=69405f87&hm=181544c05734a721ea53bbe630dcb4b25ed7b95327661a807b97bdba81cc7506&=&width=813&height=524"
 SSR_SCOTTIE_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1441591428042985492/SSR_SCOTTIE.gif?ex=69551be3&is=6953ca63&hm=9a1141a0f327f2f16ed80b996243679e62491b0fa2b985babdc1bc09d82cccaa&=&width=813&height=524"
+SSSR_MAX_GIF = "???"
 RECYCLE_GIF = "https://media.discordapp.net/attachments/796742546910871562/1455728132240703593/recycled_B.gif?ex=6955c7f8&is=69547678&hm=a047b1b23feab6ea79f4c79303bd9ee6bfba8ba9b800813754e05b9615529585&=&width=678&height=438"
 
 # Use abraizeEmbed as example for other characters
@@ -352,6 +356,23 @@ def ssr_scottieEmbed():
     embed.add_field(name=ssr_scottieAttributes[8], value="Assume the role of the eternal guardian. Grant all allies a +50% def buff and damage immunity for 2 turns. Heals all allies to full HP. Cannot be used again.", inline=False)
     return embed
 
+sssr_maxAttributes = ["?", "??", "???", "????", "?????", "?", "?", "?", "?"]
+def sssr_maxEmbed():
+    embed = discord.Embed(title=f"[???]", description="???", color=0x000000)
+  #  embed.set_image(url=SSSR_MAX_GIF)
+    embed.add_field(name="HP:", value=sssr_maxAttributes[0], inline=True)
+    embed.add_field(name="ATK:", value=sssr_maxAttributes[1], inline=True)
+    embed.add_field(name="DEF:", value=sssr_maxAttributes[2], inline=True)
+    embed.add_field(name="EVA:", value=sssr_maxAttributes[3], inline=True)
+    embed.add_field(name="ACC:", value=sssr_maxAttributes[4], inline=True)
+    embed.add_field(name=sssr_maxAttributes[5], value="???", inline=False)
+    embed.add_field(name=sssr_maxAttributes[6], value="???", inline=False)
+    embed.add_field(name=sssr_maxAttributes[7], value="???", inline=False)
+    embed.add_field(name=sssr_maxAttributes[8], value="???", inline=False)
+    embed.add_field(name="Lore:", value="An entity beyond comprehension. Its true nature is unknown.", inline=False)
+    return embed
+
+
 def roll_character(banner: str) -> str:
     # Define character pools by rarity
   #  r_chars = ["r_abraize", "r_abraize2", "r_trey", "r_noah", "r_freeman", "r_stephen"]
@@ -552,7 +573,6 @@ async def inventory(ctx):
 @app_commands.choices(character_name=character_choices)
 async def char(interaction: discord.Interaction, character_name: app_commands.Choice[str]):
     """Show Character Info"""
-    await interaction.response.defer(ephemeral=True)
 
     # Get the character dev name from the choice value
     char_dev_name = character_name.value
@@ -562,12 +582,21 @@ async def char(interaction: discord.Interaction, character_name: app_commands.Ch
     if user_data:
         inventory = user_data.get("inventory", {})
         if inventory.get(char_dev_name, 0) < 1:
-            NO_OWN_PNG = "./broke.png"
-            await interaction.followup.send(file=discord.File(NO_OWN_PNG))
-            return
+            # if sssr_max then continue even if user does not own
+            if char_dev_name == "sssr_max":
+                pass
+            else:
+                NO_OWN_PNG = "./broke.png"
+                await interaction.followup.send(file=discord.File(NO_OWN_PNG))
+                return
     else:
         await interaction.followup.send("No inventory data found.")
         return
+
+    if char_dev_name == "sssr_max":
+        await interaction.response.defer()
+    else:
+        await interaction.response.defer(ephemeral=True)
 
     # The message below will be hidden from other users.
     if char_dev_name == "r_abraize":
@@ -600,11 +629,17 @@ async def char(interaction: discord.Interaction, character_name: app_commands.Ch
         embed = sr_homestuckEmbed()
     elif char_dev_name == "ssr_scottie":
         embed = ssr_scottieEmbed()
+    elif char_dev_name == "sssr_max":
+        embed = sssr_maxEmbed()
+        yesMax = True
     else:
         await interaction.followup.send(f"Character **{char_dev_name}** does not exist!")
         return
 
     await interaction.followup.send(embed=embed)
+    if yesMax:
+        time.sleep(2)
+        await interaction.delete_original_response()
 
 
 class View(discord.ui.View):
@@ -638,6 +673,12 @@ async def recycle(ctx: discord.Interaction, character_name: app_commands.Choice[
 
         # Check if user owns the character
         if char_count < 1:
+            if char_dev_name == "sssr_max":
+                embed = discord.Embed(title="You Can't Recycle What You Don't Know", color=0x000000)
+                await ctx.response.send_message(embed=embed)
+                time.sleep(2)
+                await ctx.delete_original_response()
+                return
             NO_OWN_PNG = "./broke.png"
             await ctx.response.send_message(file=discord.File(NO_OWN_PNG))
             return
@@ -778,6 +819,12 @@ async def team(ctx: discord.Interaction, char1: app_commands.Choice[str] = None,
         inventory = user_data.get("inventory", {})
         for i, char in enumerate(team_chars):
             if inventory.get(char, 0) < 1:
+                if char == "sssr_max":
+                    embed = discord.Embed(title="Is It On Your Team?", color=0x000000)
+                    await ctx.response.send_message(embed=embed)
+                    time.sleep(2)
+                    await ctx.delete_original_response()
+                    return
                 NO_OWN_PNG = "./broke.png"
                 await ctx.response.send_message(file=discord.File(NO_OWN_PNG))
                 return
@@ -1711,15 +1758,48 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
     )
     embed.set_image(url="attachment://battle_screen.png")
 
-    startBattle(interaction.user.id, team, enemyList)
+    battleStart = startBattle(interaction.user.id, team, enemyList)
+    # set inbattle in mongodb
+    inventory_collection.update_one(
+        {"user_id": interaction.user.id},
+        {"$set": {"inBattle": True}}
+    )
 
     # it seems that you need to have a "view" to allow buttons
     class battleView(discord.ui.View):
         def __init__(self, user_id: int):
             super().__init__()
             self.user_id = user_id
+            self.build_ability_buttons(battleStart)
 
-        @discord.ui.button(label="Retreat", style=discord.ButtonStyle.danger, custom_id="retreat_button")
+        def build_ability_buttons(self, abilities):
+            # Remove old ability buttons (keep Retreat)
+            self.clear_items()
+            self.add_item(self.retreat_button)
+
+            for i, ability_name in enumerate(abilities):
+                button = discord.ui.Button(
+                    label=ability_name,
+                    style=discord.ButtonStyle.primary,
+                    row=i // 5
+                )
+
+                async def ability_callback(interaction: discord.Interaction, ability_index=i, ability_name=ability_name):
+                    if interaction.user.id != self.user_id:
+                        await interaction.response.send_message("This is not your battle!", ephemeral=True)
+                        return
+                    await interaction.response.defer()
+                    nextCharacter = advanceBattle(interaction.user.id, ability_index)
+
+                   # self.build_ability_buttons(nextCharacter)
+                   # await interaction.edit_original_response(view=self)
+
+                button.callback = ability_callback
+                self.add_item(button)
+
+
+
+        @discord.ui.button(label="Retreat", style=discord.ButtonStyle.danger, custom_id="retreat_button", row=1)
         async def retreat_button(self, interaction: discord.Interaction, button: discord.ui.Button):
             """Retreat button to end the battle."""
             if interaction.user.id != self.user_id:
@@ -1728,9 +1808,16 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
 
             # End the battle
             endBattle(interaction.user.id, 0)
+            # set in mongodb battle over
+            inventory_collection.update_one(
+                {"user_id": interaction.user.id},
+                {"$set": {"inBattle": False}}
+            )
 
-            # Disable button after retreating
-            button.disabled = True
+            # Disable all buttons
+            for item in self.children:
+                item.disabled = True
+
             await interaction.response.edit_message(view=self)
             await interaction.followup.send("You have retreated from the battle like a baby")
 
