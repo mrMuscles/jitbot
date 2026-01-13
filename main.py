@@ -103,7 +103,7 @@ characterTitles = {
     "sr_stephen": "[Master of Intervention] Stephen Goraynov",
     "ssr_jayden": "[Sworn Protectorate of Creation] Jayden Ceballos",
     "sr_homestuck": "[Thief in God's Clothing] Homestuck",
-    "ssr_scottie": "[Eternal Guardian] Scottie Jenkins",
+    "ssr_scottie": "[Overwhelming Dread] Scottie Jenkins",
     "sssr_max": "[???] ???"
 }
 
@@ -142,7 +142,7 @@ RECYCLE_GIF = "https://media.discordapp.net/attachments/796742546910871562/14557
 
 r_abraizeAttributes = [200, 10, 10, "3%", "90%", "Punch", "Sleep", "Missing Assignments"]
 def r_abraizeEmbed():
-    embed = discord.Embed(title=f"[Rolling in Success]", description="Abraize Masood", color=0x3f48cc)
+    embed = discord.Embed(title=characterTitles["r_abraize"], description="Abraize Masood", color=0x3f48cc)
     embed.set_image(url=R_ABRAIZE_GIF)
     embed.add_field(name="HP:", value=r_abraizeAttributes[0], inline=True)
     embed.add_field(name="ATK:", value=r_abraizeAttributes[1], inline=True)
@@ -156,7 +156,7 @@ def r_abraizeEmbed():
 
 r_abraize2Attributes = [200, 10, 10, "3%", "90%", "Punch", "Eat Note", "Productivity Time"]
 def r_abraize2Embed():
-    embed = discord.Embed(title=f"[Productivity Time]", description="Abraize Masood", color=0x3f48cc)
+    embed = discord.Embed(title=characterTitles["r_abraize2"], description="Abraize Masood", color=0x3f48cc)
     embed.set_image(url=R_ABRAIZE2_GIF)
     embed.add_field(name="HP:", value=r_abraize2Attributes[0], inline=True)
     embed.add_field(name="ATK:", value=r_abraize2Attributes[1], inline=True)
@@ -170,7 +170,7 @@ def r_abraize2Embed():
 
 sr_abraizeAttributes = [200, 15, 20, "3%", "90%", "Punch", "Slow", "Attempt"]
 def sr_abraizeEmbed():
-    embed = discord.Embed(title=f"[Time on my Side]", description="Abraize Masood", color=0x3f48cc)
+    embed = discord.Embed(title=characterTitles["sr_abraize"], description="Abraize Masood", color=0x3f48cc)
     embed.set_image(url=SR_ABRAIZE_GIF)
     embed.add_field(name="HP:", value=sr_abraizeAttributes[0], inline=True)
     embed.add_field(name="ATK:", value=sr_abraizeAttributes[1], inline=True)
@@ -184,7 +184,7 @@ def sr_abraizeEmbed():
 
 ssr_abraizeAttributes = [600, 35, 35, "3%", "90%", "Accelerated Punch", "Fast Forward", "Rewind", "Universal Stabilizer"]
 def ssr_abraizeEmbed():
-    embed = discord.Embed(title="[Rewind]", description="Abraize Masood", color=0x3f48cc)
+    embed = discord.Embed(title=characterTitles["ssr_abraize"], description="Abraize Masood", color=0x3f48cc)
     embed.set_image(url=SSR_ABRAIZE_GIF)
     embed.add_field(name="HP:", value=ssr_abraizeAttributes[0], inline=True)
     embed.add_field(name="ATK:", value=ssr_abraizeAttributes[1], inline=True)
@@ -199,7 +199,7 @@ def ssr_abraizeEmbed():
 
 r_treyAttributes = [250, 12, 8, "3%", "90%", "Punch", "Irish Goodbye", "Cheesy Fries"]
 def r_treyEmbed():
-    embed = discord.Embed(title=f"[Irish Golden Standard]", description="Treyvaughn Lewis", color=0x3f48cc)
+    embed = discord.Embed(title=characterTitles["r_trey"], description="Treyvaughn Lewis", color=0x3f48cc)
     embed.set_image(url=R_TREY_GIF)
     embed.add_field(name="HP:", value=r_treyAttributes[0], inline=True)
     embed.add_field(name="ATK:", value=r_treyAttributes[1], inline=True)
@@ -213,7 +213,7 @@ def r_treyEmbed():
 
 sr_treyAttributes = [300, 15, 20, "3%", "75%", "Punch", "Drowsy", "Whispers from Beyond"]
 def sr_treyEmbed():
-    embed = discord.Embed(title=f"[Heavy Sleeper]", description="Treyvaughn Lewis", color=0x3f48cc)
+    embed = discord.Embed(title=characterTitles["sr_trey"], description="Treyvaughn Lewis", color=0x3f48cc)
     embed.set_image(url=SR_TREY_GIF)
     embed.add_field(name="HP:", value=sr_treyAttributes[0], inline=True)
     embed.add_field(name="ATK:", value=sr_treyAttributes[1], inline=True)
@@ -227,7 +227,7 @@ def sr_treyEmbed():
 
 ssr_treyAttributes = [750, 30, 25, "30%", "90%", "Punch", "Cloak and Dagger", "Shroud", "Reality Sink"]
 def ssr_treyEmbed():
-    embed = discord.Embed(title=f"[Seeker of Silence]", description="Treyvaughn Lewis", color=0x3f48cc)
+    embed = discord.Embed(title=characterTitles["ssr_trey"], description="Treyvaughn Lewis", color=0x3f48cc)
     embed.set_image(url=SSR_TREY_GIF)
     embed.add_field(name="HP:", value=ssr_treyAttributes[0], inline=True)
     embed.add_field(name="ATK:", value=ssr_treyAttributes[1], inline=True)
@@ -242,7 +242,7 @@ def ssr_treyEmbed():
 
 r_noahAttributes = [180, 10, 8, "3%", "90%", "Punch", "Fiddle", "Bo"]
 def r_noahEmbed():
-    embed = discord.Embed(title=f"[pillagingPirate]", description="Noah Cave", color=0x3f48cc)
+    embed = discord.Embed(title=characterTitles["r_noah"], description="Noah Cave", color=0x3f48cc)
     embed.set_image(url=R_NOAH_GIF)
     embed.add_field(name="HP:", value=r_noahAttributes[0], inline=True)
     embed.add_field(name="ATK:", value=r_noahAttributes[1], inline=True)
@@ -256,7 +256,7 @@ def r_noahEmbed():
 
 r_freemanAttributes = [180, 8, 8, "10%", "90%", "Slap", "Ponder", "SMASH!"]
 def r_freemanEmbed():
-    embed = discord.Embed(title=f"[Who I am to Me]", description="Freeman", color=0x3f48cc)
+    embed = discord.Embed(title=characterTitles["r_freeman"], description="Freeman", color=0x3f48cc)
     embed.set_image(url=R_FREEMAN_GIF)
     embed.add_field(name="HP:", value=r_freemanAttributes[0], inline=True)
     embed.add_field(name="ATK:", value=r_freemanAttributes[1], inline=True)
@@ -270,7 +270,7 @@ def r_freemanEmbed():
 
 sr_freemanAttributes = [180, 8, 8, "10%", "90%", "Pistol Whip", "Shoot", "Hide"]
 def sr_freemanEmbed():
-    embed = discord.Embed(title=f"[Freedom in Jeopardy]", description="Freeman", color=0x3f48cc)
+    embed = discord.Embed(title=characterTitles["sr_freeman"], description="Freeman", color=0x3f48cc)
     embed.set_image(url=SR_FREEMAN_GIF)
     embed.add_field(name="HP:", value=sr_freemanAttributes[0], inline=True)
     embed.add_field(name="ATK:", value=sr_freemanAttributes[1], inline=True)
@@ -284,7 +284,7 @@ def sr_freemanEmbed():
 
 r_stephenAttributes = [180, 9, 8, "3%", "90%", "Dropkick", "Light up", "Lock the fuck in"]
 def r_stephenEmbed():
-    embed = discord.Embed(title=f"[You Marlowe?]", description="Stephen Goraynov", color=0x3f48cc)
+    embed = discord.Embed(title=characterTitles["r_stephen"], description="Stephen Goraynov", color=0x3f48cc)
     embed.set_image(url=R_STEPHEN_GIF)
     embed.add_field(name="HP:", value=r_stephenAttributes[0], inline=True)
     embed.add_field(name="ATK:", value=r_stephenAttributes[1], inline=True)
@@ -298,7 +298,7 @@ def r_stephenEmbed():
 
 sr_stephenAttributes = [180, 9, 8, "3%", "90%", "Dropkick", "Consider Intervening", "HIYAAAHHH!"]
 def sr_stephenEmbed():
-    embed = discord.Embed(title=f"[Master of Intervention]", description="Stephen Goraynov", color=0x3f48cc)
+    embed = discord.Embed(title=characterTitles["sr_stephen"], description="Stephen Goraynov", color=0x3f48cc)
     embed.set_image(url=SR_STEPHEN_GIF)
     embed.add_field(name="HP:", value=sr_stephenAttributes[0], inline=True)
     embed.add_field(name="ATK:", value=sr_stephenAttributes[1], inline=True)
@@ -312,7 +312,7 @@ def sr_stephenEmbed():
 
 ssr_jaydenAttributes = [600, 30, 30, "5%", "90%", "Punch", "Butler of Swatabi", "Indecision", "Genesis"]
 def ssr_jaydenEmbed():
-    embed = discord.Embed(title=f"[Sworn Protectorate of Creation]", description="Jayden Ceballos", color=0x3f48cc)
+    embed = discord.Embed(title=characterTitles["ssr_jayden"], description="Jayden Ceballos", color=0x3f48cc)
     embed.set_image(url=SSR_JAYDEN_GIF)
     embed.add_field(name="HP:", value=ssr_jaydenAttributes[0], inline=True)
     embed.add_field(name="ATK:", value=ssr_jaydenAttributes[1], inline=True)
@@ -327,7 +327,7 @@ def ssr_jaydenEmbed():
 
 sr_homestuckAttributes = [180, 18, 15, "5%", "90%", "Impractical Assailants", "Plunder", "Thief"]
 def sr_homestuckEmbed():
-    embed = discord.Embed(title=f"[Thief in God's Clothing]", description="Homestuck", color=0x3f48cc)
+    embed = discord.Embed(title=characterTitles["sr_homestuck"], description="Homestuck", color=0x3f48cc)
     embed.set_image(url=SR_HOMESTUCK_GIF)
     embed.add_field(name="HP:", value=sr_homestuckAttributes[0], inline=True)
     embed.add_field(name="ATK:", value=sr_homestuckAttributes[1], inline=True)
@@ -339,24 +339,24 @@ def sr_homestuckEmbed():
     embed.add_field(name=sr_homestuckAttributes[7], value="Apply a -100% acc penalty to all enemies and a +100% acc bonus to all allies for one turn. Cannot be used again for 5 turns.", inline=False)
     return embed
 
-ssr_scottieAttributes = [700, 40, 40, "5%", "90%", "Shield Bash", "Guardian's Shield", "Fortify", "Eternal Watch"]
+ssr_scottieAttributes = [700, 40, 40, "5%", "90%", "Fated Strike", "Existential Dread", "Martyrdom", "Nihilism"]
 def ssr_scottieEmbed():
-    embed = discord.Embed(title=f"[Eternal Guardian]", description="Scottie Jenkins", color=0x3f48cc)
+    embed = discord.Embed(title=characterTitles["ssr_scottie"], description="Scottie Jenkins", color=0x3f48cc)
     embed.set_image(url=SSR_SCOTTIE_GIF)
     embed.add_field(name="HP:", value=ssr_scottieAttributes[0], inline=True)
     embed.add_field(name="ATK:", value=ssr_scottieAttributes[1], inline=True)
     embed.add_field(name="DEF:", value=ssr_scottieAttributes[2], inline=True)
     embed.add_field(name="EVA:", value=ssr_scottieAttributes[3], inline=True)
     embed.add_field(name="ACC:", value=ssr_scottieAttributes[4], inline=True)
-    embed.add_field(name=ssr_scottieAttributes[5], value="Bash an enemy with your shield, dealing damage and a 20% chance to stun them for one turn.", inline=False)
-    embed.add_field(name=ssr_scottieAttributes[6], value="Create a shield that absorbs damage equal to 20% of your max HP for all allies for 3 turns. Cannot be used again for 4 turns.", inline=False)
-    embed.add_field(name=ssr_scottieAttributes[7], value="Fortify all allies, granting a +30% def buff for 3 turns. Cannot be used again for 4 turns.", inline=False)
-    embed.add_field(name=ssr_scottieAttributes[8], value="Assume the role of the eternal guardian. Grant all allies a +50% def buff and damage immunity for 2 turns. Heals all allies to full HP. Cannot be used again.", inline=False)
+    embed.add_field(name=ssr_scottieAttributes[5], value="Unique Property is that the attack is unaffected by accuracy debuffs and is guaranteed to connect, Low Damage and If used twice applies a doom mark", inline=False)
+    embed.add_field(name=ssr_scottieAttributes[6], value="Debuff targets all enemies Reduces accuracy and damage for 3 turns Accuracy and damage reduction scale for the amount of doom marks an enemy has 15%+7.5(marks) for damage reduction 20%+5(marks) for accuracy Doom marks are consumed and removed upon use", inline=False)
+    embed.add_field(name=ssr_scottieAttributes[7], value="Redirects enemies to attack Scottie for 2 turns Damage reduction 30% Each successfull attack landed on Scottie inflicts 1 doom mark to the assailant (If an enemy does a single strong hit only one mark will apply, but if an enemy does a barrage; the amount of marks will follow accordingly) 1x12=1 mark 3x4=3 marks If Scottie is to die during martyrdom the doom marks that were already applied will explode dealing major damage to enemies", inline=False)
+    embed.add_field(name=ssr_scottieAttributes[8], value="Only usable after a minimum of 3 turns and if the total amount of doom makes on the field is 5 For 3 turns every enemy on the field will lose all sense of will and reason Causing a chance event for each turn applied 33% chance for an enemy to harm itself 33% chance for an enemy to attack on of its allies 33% chance for an enemy to lay motionless allowing all attack done to them be guaranteed to land", inline=False)
     return embed
 
 sssr_maxAttributes = ["?", "??", "???", "????", "?????", "?", "?", "?", "?"]
 def sssr_maxEmbed():
-    embed = discord.Embed(title=f"[???]", description="???", color=0x000000)
+    embed = discord.Embed(title=characterTitles["sssr_max"], description="???", color=0x000000)
     embed.set_image(url=SSSR_MAX_GIF)
     embed.add_field(name="HP:", value=sssr_maxAttributes[0], inline=True)
     embed.add_field(name="ATK:", value=sssr_maxAttributes[1], inline=True)
@@ -1819,7 +1819,7 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
                 item.disabled = True
 
             await interaction.response.edit_message(view=self)
-            await interaction.followup.send("You have retreated from the battle like a baby")
+            await interaction.followup.send("You have retreated from the battle!")
 
     battle_view = battleView(interaction.user.id)
     await interaction.response.send_message(file=discord.File(combined_image_path), embed=embed, view=battle_view)

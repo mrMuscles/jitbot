@@ -1,18 +1,30 @@
 # English only
 enemyAttributes = {
     "Ruffian": [175, 5, 5, "0%", "80%", "Punch"],
-    # 25 damage, 65% acc
-    "Grunt": [400, 250, 45, "0%", "100%", "Punch", "Slam, Deal 15 Damage to all party members"],
+    "Grunt": [400, 25, 45, "0%", "65%", "Punch", "Slam, Deal 15 Damage to all party members"],
     "Spearman": [175, 5, 5, "0%", "80%", "Punch", "Swipe, Deal 20 damage to all party members", "Stab, Apply 15%% attack damage bonus to self for this turn and deal damage"],
     "Agent": [175, 5, 5, "0%", "80%", "Punch", "Sneak, Add 15%% evasion to self for next 4 turns, then use Punch"],
     "Jack Noir": [1000, 30, 10, "5%", "90%", "Stab", "Shiv, Deal damage and apply bleed to player (-3% hp per turn) for one turn, this can stack", "Slash, Deal only 5 damage to all party members, but apply bleed to all party members for one turn.", "Extra Passive: Attack lowest health party member each turn"]
 }
-# English Only
+# Only Get the 5 stats from here (abilities are defined in characterAbilities)
+# HP, Attack, Defense, Evasion, Accuracy, Abilities
 characterAttributes = {
     "rAbraize": [200, 10, 10, "3%", "90%", "Punch", "Sleep", "Missing Assignments"],
-    "rNoah": [180, 10, 8, "3%", "90%", "Punch", "Fiddle", "Bo"],
+    "rAbraize2": [200, 10, 10, "3%", "90%", "Punch", "Eat Note", "Productivity Time"],
+    "srAbraize":  [200, 15, 20, "3%", "90%", "Punch", "Slow", "Attempt"],
+    "ssrAbraize": [600, 35, 35, "3%", "90%", "Accelerated Punch", "Fast Forward", "Rewind", "Universal Stabilizer"],
     "rTrey": [250, 12, 8, "3%", "90%", "Punch", "Irish Goodbye", "Cheesy Fries"],
-    "rFreeman": [180, 8, 8, "10%", "90%", "Slap", "Ponder", "SMASH!"]
+    "srTrey": [300, 15, 20, "3%", "75%", "Punch", "Drowsy", "Whispers from Beyond"],
+    "ssrTrey": [750, 30, 25, "30%", "90%", "Punch", "Cloak and Dagger", "Shroud", "Reality Sink"],
+    "rNoah": [180, 10, 8, "3%", "90%", "Punch", "Fiddle", "Bo"],
+    "rFreeman": [180, 8, 8, "10%", "90%", "Slap", "Ponder", "SMASH!"],
+    "srFreeman": [180, 8, 8, "10%", "90%", "Pistol Whip", "Shoot", "Hide"],
+    "rStephen": [180, 9, 8, "3%", "90%", "Dropkick", "Light up", "Lock the fuck in"],
+    "srStephen": [180, 9, 8, "3%", "90%", "Dropkick", "Consider Intervening", "HIYAAAHHH!"],
+    "ssrJayden": [600, 30, 30, "5%", "90%", "Punch", "Butler of Swatabi", "Indecision", "Genesis"],
+    "srHomestuck": [180, 18, 15, "5%", "90%", "Impractical Assailants", "Plunder", "Thief"],
+    "ssrScottie": [700, 40, 40, "5%", "90%", "Shield Bash", "Guardian's Shield", "Fortify", "Eternal Watch"],
+   # "sssrMax": [0, 0, 0, "100%", "100%", "???", "???", "???", "???", "?????"]
 }
 # HP, Attack, Defense are all Flat Numbers
 # Evasion and Accuracy are percentages
@@ -36,20 +48,78 @@ characterAbilities = {
     "Sleep": ['Z'],                         # Skip Turn (temp)
     "Missing Assignments": ['D', 'G']       # Buff self with +5% evasion for 1 turn
   },
+  "r_abraize2": {
+    "Punch": ['A'],                         # Flat Damage using Attack Stat
+    "Eat Note": ['Z'],                 # Skip turn (temp)
+    "Productivity Time": ['Z']              # Skip turn (temp)
+  },
+  "sr_abraize": {
+    "Punch": ['A'],                         # Flat Damage using Attack Stat
+    "Slow": ['Z'],                          # Skip turn (temp)
+    "Attempt": ['Z']                        # Skip turn (temp)
+  },
+  "ssr_abraize": {
+    "Accelerated Punch": ['A'],             # Flat Damage using Attack Stat
+    "Fast Forward": ['Z'],                  # Skip turn (temp)
+    "Rewind": ['Z'],                        # Skip turn (temp)
+    "Universal Stabilizer": ['Z']          # Skip turn (temp)
+  },
+    "r_trey": {
+    "Punch": ['A'],                         # Flat Damage using Attack Stat
+    "Irish Goodbye": ['Z'],                 # Skip turn (temp)
+    "Cheesy Fries": ['Z']                   # Skip turn (temp)
+  },
+  "sr_trey": {
+    "Punch": ['A'],                         # Flat Damage using Attack Stat
+    "Drowsy": ['Z'],                        # Skip turn (temp)
+    "Whispers from Beyond": ['Z']           # Skip turn (temp)
+  },
+  "ssr_trey": {
+    "Punch": ['A'],                         # Flat Damage using Attack Stat
+    "Cloak and Dagger": ['Z'],              # Skip turn (temp)
+    "Shroud": ['Z'],                        # Skip turn (temp)
+    "Reality Sink": ['Z']                   # Skip turn (temp)
+  },
   "r_noah": {
     "Punch": ['A'],                         # Flat Damage using Attack Stat
     "Fiddle": ['E', 'F'],                   # -5% debuff to all stats to 1 enemy
     "Bo": ['Z']                             # Skip turn (temp)
   },
-  "r_trey": {
-    "Punch": ['A'],                         # Flat Damage using Attack Stat
-    "Irish Goodbye": ['Z'],                 # Skip turn (temp)
-    "Cheesy Fries": ['Z']                   # Skip turn (temp)
-  },
   "r_freeman": {
     "Slap": ['A'],                         # Flat Damage using Attack Stat
     "Ponder": ['C', 'D'],                  # +3% evasion buff to all teammates
     "SMASH!": ['Z']                        # Skip turn (temp)
+  },
+  "sr_freeman": {
+    "Pistol Whip": ['A'],                  # Flat Damage using Attack Stat
+    "Shoot": ['Z'],                        # Skip turn (temp)
+    "Hide": ['Z']                          # Skip turn (temp)
+  },
+  "r_stephen": {
+    "Dropkick": ['A'],                     # Flat Damage using Attack Stat
+    "Light up": ['Z'],                     # Skip turn (temp)
+    "Lock the fuck in": ['Z']              # Skip turn (temp)
+  },
+  "sr_stephen": {
+    "Dropkick": ['A'],                     # Flat Damage using Attack Stat
+    "Consider Intervening": ['Z'],         # Skip turn (temp)
+    "HIYAAAHHH!": ['Z']                    # Skip turn (temp)
+  },
+  "ssr_jayden": {
+    "Punch": ['A'],                        # Flat Damage using Attack Stat
+    "Butler of Swatabi": ['Z'],            # Skip turn (temp)
+    "Indecision": ['Z'],                   # Skip turn (temp)
+    "Genesis": ['Z']
+  },
+  "sr_homestuck": {
+    "Impractical Assailants": ['A'],       # Flat Damage using Attack Stat
+    "Plunder": ['Z'],                      # Skip turn (temp)
+    "Thief": ['Z']                         # Skip turn (temp)
+  },
+  "ssr_scottie": {
+    "Ultimate Strike": ['A'],              # Flat Damage using Attack Stat
+    "Shadow Dance": ['Z'],                 # Skip turn (temp)
+    "Phantom Grip": ['Z']                  # Skip turn (temp)
   }
 }
 
@@ -67,6 +137,7 @@ enemyAbilities = {
 turnOrder = {}
 whosTurn = {}
 teamAbilities = {}
+battleEhp = {}
 
 def startBattle(discordID, team, enemies):
   print("Battle Started with user", discordID)
