@@ -138,7 +138,6 @@ def advanceBattle(discordID, abilityUsed):
   print("Ability used was:", abilityUsed)
   print("Current turn is:", whosTurn[discordID])
   # do math here
- # print("Advancing battle for user", discordID)
   # then it will return the abilities for the next character in the turn order
  # whosTurn[discordID] = turnOrder[discordID][+1]
   # get abilties for next character
@@ -161,7 +160,11 @@ def enemyTurn(discordID):
   print("Enemy turn for user", discordID)
   # do enemy logic here
  # print("Enemy logic happened for user", discordID)
+ # each enemy gets to attack twice
   # reset back to the beginning of turn order because enemy turn is now over (temp code)
+
+  # Note: double check that both enemies can attack before this is called when implementing logic
+
   whosTurn[discordID] = turnOrder[discordID][0]
   print("Next turn is for", whosTurn[discordID])
   #advanceBattle(discordID, None)

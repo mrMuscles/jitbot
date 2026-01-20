@@ -81,7 +81,25 @@ characterAttributes = {
 # Option E = Debuff (However if Option B then it should AOE Debuff Enemies and if Option C then AOE Debuff Teammates)
 # Option F = Specific Target on opposing team
 # Option G = Specific Target on own team
-# Option Z = Skip (For Dev)
+# Option H = Cooldown before you can use the same move again
+# Option I = Stacks of same kind on targets which works with 1 or multiple targets
+# Option J
+# Option K
+# Option L
+# Option M
+# Option N
+# Option O
+# Option P
+# Option Q = Jack Noir Special Passive (Attack lowest health target each turn)
+# Option R = Future Boss Special Reserved
+# OPtion S = Future Boss Special Reserved
+# Option T = Future Boss Special Reserved
+# Option U = Future Boss Special Reserved
+# Option V = Future Boss Special Reserved
+# OPtion W = Future Boss Special Reserved
+# Option X = reserved
+# Option Y = reserved
+# Option Z = Skip Move (For Dev)
 
 # Options D and E are Basic buffs meaning they only change the 5 main stats of HP, Attack, Defense, Evasion, and Accuracy
 
@@ -94,7 +112,7 @@ characterAbilities = {
   },
   "r_abraize2": {
     "Punch": ['A'],                         # Flat Damage using Attack Stat
-    "Eat Note": ['Z'],                 # Skip turn (temp)
+    "Eat Note": ['Z'],                      # Skip turn (temp)
     "Productivity Time": ['Z']              # Skip turn (temp)
   },
   "sr_abraize": {
