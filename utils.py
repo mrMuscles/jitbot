@@ -43,30 +43,30 @@ characterTitles = {
 # Enemy Attributes and Character Attributes (5 basic stats, how many moves they get, plus abilities name)
 # HP, Attack, Defense, Moves, Evasion, Accuracy, Abilities
 enemyAttributes = {
-    "Ruffian": [175, 5, 5, 2, "0%", "80%", "Punch"],
-    "Grunt": [400, 25, 45, 2, "0%", "65%", "Punch", "Slam, Deal 15 Damage to all party members"],
-    "Spearman": [175, 5, 5, 2, "0%", "80%", "Punch", "Swipe, Deal 20 damage to all party members", "Stab, Apply 15%% attack damage bonus to self for this turn and deal damage"],
-    "Agent": [175, 5, 5, 2, "0%", "80%", "Punch", "Sneak, Add 15%% evasion to self for next 4 turns, then use Punch"],
-    "Jack Noir": [1000, 30, 10, 3, "5%", "90%", "Stab", "Shiv, Deal damage and apply bleed to player (-3% hp per turn) for one turn, this can stack", "Slash, Deal only 5 damage to all party members, but apply bleed to all party members for one turn.", "Extra Passive: Attack lowest health party member each turn"]
+    "Ruffian": [175, 5, 5, 2, 0, 80, "Punch"],
+    "Grunt": [400, 25, 45, 2, 0, 65, "Punch", "Slam, Deal 15 Damage to all party members"],
+    "Spearman": [175, 5, 5, 2, 0, 80, "Punch", "Swipe, Deal 20 damage to all party members", "Stab, Apply 15%% attack damage bonus to self for this turn and deal damage"],
+    "Agent": [175, 5, 5, 2, 0, 80, "Punch", "Sneak, Add 15%% evasion to self for next 4 turns, then use Punch"],
+    "Jack Noir": [1000, 30, 10, 3, 5, 90, "Stab", "Shiv, Deal damage and apply bleed to player (-3% hp per turn) for one turn, this can stack", "Slash, Deal only 5 damage to all party members, but apply bleed to all party members for one turn.", "Extra Passive: Attack lowest health party member each turn"]
 }
 # Only Get the 5 stats from here (abilities are defined in characterAbilities)
 # HP, Attack, Defense, Evasion, Accuracy, Abilities
 characterAttributes = {
-    "r_abraize": [200, 10, 10, "3%", "90%", "Punch", "Sleep", "Missing Assignments"],
-    "r_abraize2": [200, 10, 10, "3%", "90%", "Punch", "Eat Note", "Productivity Time"],
-    "sr_abraize":  [200, 15, 20, "3%", "90%", "Punch", "Slow", "Attempt"],
-    "ssr_abraize": [600, 35, 35, "3%", "90%", "Accelerated Punch", "Fast Forward", "Rewind", "Universal Stabilizer"],
-    "r_trey": [250, 12, 8, "3%", "90%", "Punch", "Irish Goodbye", "Cheesy Fries"],
-    "sr_trey": [300, 15, 20, "3%", "75%", "Punch", "Drowsy", "Whispers from Beyond"],
-    "ssr_trey": [750, 30, 25, "30%", "90%", "Punch", "Cloak and Dagger", "Shroud", "Reality Sink"],
-    "r_noah": [180, 10, 8, "3%", "90%", "Punch", "Fiddle", "Bo"],
-    "r_freeman": [180, 8, 8, "10%", "90%", "Slap", "Ponder", "SMASH!"],
-    "sr_freeman": [180, 8, 8, "10%", "90%", "Pistol Whip", "Shoot", "Hide"],
-    "r_stephen": [180, 9, 8, "3%", "90%", "Dropkick", "Light up", "Lock the fuck in"],
-    "sr_stephen": [180, 9, 8, "3%", "90%", "Dropkick", "Consider Intervening", "HIYAAAHHH!"],
-    "ssr_jayden": [600, 30, 30, "5%", "90%", "Punch", "Butler of Swatabi", "Indecision", "Genesis"],
-    "sr_homestuck": [180, 18, 15, "5%", "90%", "Impractical Assailants", "Plunder", "Thief"],
-    "ssr_scottie": [700, 40, 40, "5%", "90%", "Shield Bash", "Guardian's Shield", "Fortify", "Eternal Watch"],
+    "r_abraize": [200, 10, 10, 3, 90, "Punch", "Sleep", "Missing Assignments"],
+    "r_abraize2": [200, 10, 10, 3, 90, "Punch", "Eat Note", "Productivity Time"],
+    "sr_abraize":  [200, 15, 20, 3, 90, "Punch", "Slow", "Attempt"],
+    "ssr_abraize": [600, 35, 35, 3, 90, "Accelerated Punch", "Fast Forward", "Rewind", "Universal Stabilizer"],
+    "r_trey": [250, 12, 8, 3, 90, "Punch", "Irish Goodbye", "Cheesy Fries"],
+    "sr_trey": [300, 15, 20, 3, 75, "Punch", "Drowsy", "Whispers from Beyond"],
+    "ssr_trey": [750, 30, 25, 30, 90, "Punch", "Cloak and Dagger", "Shroud", "Reality Sink"],
+    "r_noah": [180, 10, 8, 3, 90, "Punch", "Fiddle", "Bo"],
+    "r_freeman": [180, 8, 8, 10, 90, "Slap", "Ponder", "SMASH!"],
+    "sr_freeman": [180, 8, 8, 10, 90, "Pistol Whip", "Shoot", "Hide"],
+    "r_stephen": [180, 9, 8, 3, 90, "Dropkick", "Light up", "Lock the fuck in"],
+    "sr_stephen": [180, 9, 8, 3, 90, "Dropkick", "Consider Intervening", "HIYAAAHHH!"],
+    "ssr_jayden": [600, 30, 30, 5, 90, "Punch", "Butler of Swatabi", "Indecision", "Genesis"],
+    "sr_homestuck": [180, 18, 15, 5, 90, "Impractical Assailants", "Plunder", "Thief"],
+    "ssr_scottie": [700, 40, 40, 5, 90, "Shield Bash", "Guardian's Shield", "Fortify", "Eternal Watch"],
     "sssr_max": ["?", "??", "???", "???", "???", "???", "???", "???", "???", "?????"]
 }
 

@@ -1,3 +1,4 @@
+import random
 from utils import *
 
 # Store global variable of turn order based on discord id so that battles dont get mixed up between users at same time
@@ -57,6 +58,70 @@ def enemyTurn(discordID):
   # nothing yet
   print("Enemy turn for user", discordID)
   # do enemy logic here
+
+  # get all enemies in this battle for discord id
+  enemiesInBattle = list(battleStats[discordID]['enemies'].keys())
+  print("Enemies in battle are:", enemiesInBattle)
+
+  # get first enemy then next enemy until all have gone
+  # need to jump back up here if enemy has moves remaining
+
+  for enemy in enemiesInBattle:
+    while battleStats[discordID]['enemies'][enemy]['moves'] > 0:
+      damageDealt = 0
+      targetsChosen = []
+
+      # randomly select an ability from enemy abilities
+      enemyAbilitiesList = allAbilities[discordID]['enemies'][enemy]
+      print(f"Abilities for enemy {enemy} are:", enemyAbilitiesList)
+      selectedAbility = random.choice(list(enemyAbilitiesList.keys()))  # same chance for each ability
+      print(f"Enemy {enemy} selected ability:", selectedAbility)
+
+      # do option checks
+      options = enemyAbilitiesList[selectedAbility]
+      print(f"Options for ability {selectedAbility} are:", options)
+
+      if 'A' in options:
+        print(f"Enemy {enemy} is using attack ability {selectedAbility}")
+        damageDealt = battleStats[discordID]['enemies'][enemy]['attack']
+      if 'F' in options:
+        print(f"Enemy {enemy} is targeting player {random.choice(list(battleStats[discordID]['players'].keys()))} using {selectedAbility}")
+      if 'Z' in options:
+        print(f"Enemy {enemy} is skipping their turn using ability {selectedAbility}")
+
+
+      if targetsChosen is None or len(targetsChosen) == 0:
+        print(f"Enemy {enemy} did not select any targets, error in logic")
+        targetsChosen = [random.choice(list(battleStats[discordID]['players'].keys()))]
+
+      if damageDealt > 0:
+        for target in targetsChosen:
+          print(f"Enemy {enemy} planning to deal {damageDealt} damage to player {target} using ability {selectedAbility}")
+
+          # accuracy check
+          if random.randint(1, 100) > battleStats[discordID]['enemies'][enemy]['accuracy']:
+            print(f"Enemy {enemy}'s attack missed player {target}!")
+          else:
+            # evasion check
+            if random.randint(1, 100) <= battleStats[discordID]['players'][target]['evasion']:
+              print(f"Player {target} evaded the attack from enemy {enemy}!")
+            else:
+              print(f"Enemy {enemy} hit player {target} for {damageDealt} damage!")
+              # do
+              battleStats[discordID]['players'][target]['ehp'] -= damageDealt
+
+        # battleStats[discordID]['players'][target]['ehp'] -= damageDealt
+        print(f"Player {target} now has {battleStats[discordID]['players'][target]['ehp']} ehp remaining")
+
+      # repeat for number of moves enemy has
+      enemyMoves = battleStats[discordID]['enemies'][enemy]['moves']
+     # print(f"Enemy {enemy} has {enemyMoves} moves")
+
+      if enemyMoves >= 1:
+        battleStats[discordID]['enemies'][enemy]['moves'] -= 1
+        print(f"Enemy {enemy} has {battleStats[discordID]['enemies'][enemy]['moves']} moves remaining")
+        continue
+
  # print("Enemy logic happened for user", discordID)
  # each enemy gets to attack twice
   # reset back to the beginning of turn order because enemy turn is now over (temp code)
@@ -110,6 +175,7 @@ def getStats(discordID, team, enemies):
       "attack": enemyAttributes[enemy][1],
       "evasion": enemyAttributes[enemy][4],
       "accuracy": enemyAttributes[enemy][5],
+      "moves": enemyAttributes[enemy][3],
     }
 
   return allStats
