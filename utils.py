@@ -12,6 +12,7 @@ homestuckChar = ["sr_homestuck"]
 scottieChar = ["ssr_scottie"]
 maxChar = ["sssr_max"]
 '''
+
 # Characters that exists here are every character in the game but in each section
 rChar = ["r_abraize", "r_abraize2", "r_trey", "r_noah", "r_freeman", "r_stephen"]
 srChar = ["sr_freeman", "sr_stephen", "sr_homestuck", "sr_abraize", "sr_trey"]
@@ -39,13 +40,14 @@ characterTitles = {
     "sssr_max": "[???] ???"
 }
 
-# Enemy Attributes and Character Attributes (5 basic stts plus abilities name)
+# Enemy Attributes and Character Attributes (5 basic stats, how many moves they get, plus abilities name)
+# HP, Attack, Defense, Moves, Evasion, Accuracy, Abilities
 enemyAttributes = {
-    "Ruffian": [175, 5, 5, "0%", "80%", "Punch"],
-    "Grunt": [400, 25, 45, "0%", "65%", "Punch", "Slam, Deal 15 Damage to all party members"],
-    "Spearman": [175, 5, 5, "0%", "80%", "Punch", "Swipe, Deal 20 damage to all party members", "Stab, Apply 15%% attack damage bonus to self for this turn and deal damage"],
-    "Agent": [175, 5, 5, "0%", "80%", "Punch", "Sneak, Add 15%% evasion to self for next 4 turns, then use Punch"],
-    "Jack Noir": [1000, 30, 10, "5%", "90%", "Stab", "Shiv, Deal damage and apply bleed to player (-3% hp per turn) for one turn, this can stack", "Slash, Deal only 5 damage to all party members, but apply bleed to all party members for one turn.", "Extra Passive: Attack lowest health party member each turn"]
+    "Ruffian": [175, 5, 5, 2, "0%", "80%", "Punch"],
+    "Grunt": [400, 25, 45, 2, "0%", "65%", "Punch", "Slam, Deal 15 Damage to all party members"],
+    "Spearman": [175, 5, 5, 2, "0%", "80%", "Punch", "Swipe, Deal 20 damage to all party members", "Stab, Apply 15%% attack damage bonus to self for this turn and deal damage"],
+    "Agent": [175, 5, 5, 2, "0%", "80%", "Punch", "Sneak, Add 15%% evasion to self for next 4 turns, then use Punch"],
+    "Jack Noir": [1000, 30, 10, 3, "5%", "90%", "Stab", "Shiv, Deal damage and apply bleed to player (-3% hp per turn) for one turn, this can stack", "Slash, Deal only 5 damage to all party members, but apply bleed to all party members for one turn.", "Extra Passive: Attack lowest health party member each turn"]
 }
 # Only Get the 5 stats from here (abilities are defined in characterAbilities)
 # HP, Attack, Defense, Evasion, Accuracy, Abilities
@@ -82,7 +84,7 @@ characterAttributes = {
 # Option F = Specific Target on opposing team
 # Option G = Specific Target on own team
 # Option H = Cooldown before you can use the same move again
-# Option I = Stacks of same kind on targets which works with 1 or multiple targets
+# Option I = Stacks of same kind on targets
 # Option J
 # Option K
 # Option L
@@ -108,7 +110,7 @@ characterAbilities = {
   "r_abraize": {
     "Punch": ['A'],                         # Flat Damage using Attack Stat
     "Sleep": ['Z'],                         # Skip Turn (temp)
-    "Missing Assignments": ['D', 'G']       # Buff self with +5% evasion for 1 turn
+    "Missing Assignments": ['Z']       # Buff self with +5% evasion for 1 turn
   },
   "r_abraize2": {
     "Punch": ['A'],                         # Flat Damage using Attack Stat
@@ -144,12 +146,12 @@ characterAbilities = {
   },
   "r_noah": {
     "Punch": ['A'],                         # Flat Damage using Attack Stat
-    "Fiddle": ['E', 'F'],                   # -5% debuff to all stats to 1 enemy
+    "Fiddle": ['Z'],                        # -5% debuff to all stats to 1 enemy
     "Bo": ['Z']                             # Skip turn (temp)
   },
   "r_freeman": {
     "Slap": ['A'],                         # Flat Damage using Attack Stat
-    "Ponder": ['C', 'D'],                  # +3% evasion buff to all teammates
+    "Ponder": ['Z'],                       # +3% evasion buff to all teammates
     "SMASH!": ['Z']                        # Skip turn (temp)
   },
   "sr_freeman": {
@@ -195,7 +197,7 @@ enemyAbilities = {
   }
 }
 
-# GIFs for Everything
+# GIFs for Everything --> Later convert to Files
 R_ABRAIZE_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1442262933018251467/R_ABRAIZE.gif?ex=692a1187&is=6928c007&hm=ea36ca7f4742ec74ad4786385624dbbbf1c69ba9c809bf2499c5b23b85f39b38&=&width=813&height=524"
 R_ABRAIZE2_GIF = "https://media.discordapp.net/attachments/796742546910871562/1444044329583640748/R_ABRAIZE_PROD.gif?ex=692b4695&is=6929f515&hm=1ecc69064ddd0b38a7b3e9be1d13e2541c99e9e7c0948619b3d486e3ac440f06&=&width=678&height=438"
 SR_ABRAIZE_GIF = "https://media.discordapp.net/attachments/907662210619289600/1441575065413091500/SR_ABRAIZ.gif?ex=69414626&is=693ff4a6&hm=c51aa1cf7872069ee96e7365b27d288de2e9cb3d9780375137cebaf6d7196d89&=&width=813&height=524"

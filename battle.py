@@ -1,134 +1,32 @@
 from utils import *
 
-# HP, Attack, Defense are all Flat Numbers
-# Evasion and Accuracy are percentages
-
-# Character titles do not matter in Battle.py as main.py will convert the names to the correct format when needed
-
-# Option A = Damage using Attack Stat (Should be extra parameter in function when calling damaging moves to add damage)
-# Option B = Area of Effect at Enemies
-# Option C = Area of Effect at Teammates
-# Option D = Buff (However if Option B then it should AOE Buff Enemies and if Option C then AOE Buff Teammates)
-# Option E = Debuff (However if Option B then it should AOE Debuff Enemies and if Option C then AOE Debuff Teammates)
-# Option F = Specific Target on opposing team
-# Option G = Specific Target on own team
-# Option Z = Skip (For Dev)
-
-# Options D and E are Basic buffs meaning they only change the 5 main stats of HP, Attack, Defense, Evasion, and Accuracy
-
-characterAbilities = {
-  "r_abraize": {
-    "Punch": ['A'],                         # Flat Damage using Attack Stat
-    "Sleep": ['Z'],                         # Skip Turn (temp)
-    "Missing Assignments": ['D', 'G']       # Buff self with +5% evasion for 1 turn
-  },
-  "r_abraize2": {
-    "Punch": ['A'],                         # Flat Damage using Attack Stat
-    "Eat Note": ['Z'],                 # Skip turn (temp)
-    "Productivity Time": ['Z']              # Skip turn (temp)
-  },
-  "sr_abraize": {
-    "Punch": ['A'],                         # Flat Damage using Attack Stat
-    "Slow": ['Z'],                          # Skip turn (temp)
-    "Attempt": ['Z']                        # Skip turn (temp)
-  },
-  "ssr_abraize": {
-    "Accelerated Punch": ['A'],             # Flat Damage using Attack Stat
-    "Fast Forward": ['Z'],                  # Skip turn (temp)
-    "Rewind": ['Z'],                        # Skip turn (temp)
-    "Universal Stabilizer": ['Z']          # Skip turn (temp)
-  },
-    "r_trey": {
-    "Punch": ['A'],                         # Flat Damage using Attack Stat
-    "Irish Goodbye": ['Z'],                 # Skip turn (temp)
-    "Cheesy Fries": ['Z']                   # Skip turn (temp)
-  },
-  "sr_trey": {
-    "Punch": ['A'],                         # Flat Damage using Attack Stat
-    "Drowsy": ['Z'],                        # Skip turn (temp)
-    "Whispers from Beyond": ['Z']           # Skip turn (temp)
-  },
-  "ssr_trey": {
-    "Punch": ['A'],                         # Flat Damage using Attack Stat
-    "Cloak and Dagger": ['Z'],              # Skip turn (temp)
-    "Shroud": ['Z'],                        # Skip turn (temp)
-    "Reality Sink": ['Z']                   # Skip turn (temp)
-  },
-  "r_noah": {
-    "Punch": ['A'],                         # Flat Damage using Attack Stat
-    "Fiddle": ['E', 'F'],                   # -5% debuff to all stats to 1 enemy
-    "Bo": ['Z']                             # Skip turn (temp)
-  },
-  "r_freeman": {
-    "Slap": ['A'],                         # Flat Damage using Attack Stat
-    "Ponder": ['C', 'D'],                  # +3% evasion buff to all teammates
-    "SMASH!": ['Z']                        # Skip turn (temp)
-  },
-  "sr_freeman": {
-    "Pistol Whip": ['A'],                  # Flat Damage using Attack Stat
-    "Shoot": ['Z'],                        # Skip turn (temp)
-    "Hide": ['Z']                          # Skip turn (temp)
-  },
-  "r_stephen": {
-    "Dropkick": ['A'],                     # Flat Damage using Attack Stat
-    "Light up": ['Z'],                     # Skip turn (temp)
-    "Lock the fuck in": ['Z']              # Skip turn (temp)
-  },
-  "sr_stephen": {
-    "Dropkick": ['A'],                     # Flat Damage using Attack Stat
-    "Consider Intervening": ['Z'],         # Skip turn (temp)
-    "HIYAAAHHH!": ['Z']                    # Skip turn (temp)
-  },
-  "ssr_jayden": {
-    "Punch": ['A'],                        # Flat Damage using Attack Stat
-    "Butler of Swatabi": ['Z'],            # Skip turn (temp)
-    "Indecision": ['Z'],                   # Skip turn (temp)
-    "Genesis": ['Z']
-  },
-  "sr_homestuck": {
-    "Impractical Assailants": ['A'],       # Flat Damage using Attack Stat
-    "Plunder": ['Z'],                      # Skip turn (temp)
-    "Thief": ['Z']                         # Skip turn (temp)
-  },
-  "ssr_scottie": {
-    "Ultimate Strike": ['A'],              # Flat Damage using Attack Stat
-    "Shadow Dance": ['Z'],                 # Skip turn (temp)
-    "Phantom Grip": ['Z']                  # Skip turn (temp)
-  }
-}
-
-enemyAbilities = {
-  "Ruffian": {
-    "Punch": ['A']                         # Flat Damage using Attack Stat
-  },
-  "Grunt": {
-    "Punch": ['A'],                        # Flat Damage using Attack Stat
-    "Slam": ['A', 'B']                     # Damage to all enemies
-  }
-}
-
 # Store global variable of turn order based on discord id so that battles dont get mixed up between users at same time
 turnOrder = {}
 whosTurn = {}
-teamAbilities = {}
-battleEhp = {}
+allAbilities = {}
+battleStats = {}
 
 def startBattle(discordID, team, enemies):
   print("Battle Started with user", discordID)
-  teamAbilities[discordID] = getAllAbilities(discordID, team, enemies)
+  allAbilities[discordID] = getAllAbilities(discordID, team, enemies)
   turnOrder[discordID] = calculateTurnOrder(discordID, team, enemies)
   for member in team:
-    print(f"Team member {member} abilities: {teamAbilities[discordID]['players'][member]}")
+    print(f"Team member {member} abilities: {allAbilities[discordID]['players'][member]}")
   for enemy in enemies:
-    print(f"Enemy {enemy} abilities: {teamAbilities[discordID]['enemies'][enemy]}")
+    print(f"Enemy {enemy} abilities: {allAbilities[discordID]['enemies'][enemy]}")
 
   print("Turn order is:", turnOrder)
   print("DiscordID turn order is", turnOrder[discordID])
   whosTurn[discordID] = turnOrder[discordID][0]
 
+  # Get hp and defense of players and place into battleEHP
+  battleStats[discordID] = getStats(discordID, team, enemies)
+
+  print(battleStats[discordID])
+
   print("Battle Start Configuration Finished", discordID)
   # should return character abilities from characterattributes for first character on team
-  return teamAbilities[discordID]['players'][whosTurn[discordID]]
+  return allAbilities[discordID]['players'][whosTurn[discordID]]
 
 def advanceBattle(discordID, abilityUsed):
   # once everything with configuration is finished then startBattle will end and return with first character on team abilities
@@ -149,10 +47,10 @@ def advanceBattle(discordID, abilityUsed):
     # skip over and go to enemy logic
     enemyTurn(discordID)
     # after enemy turn is done it will return the next player character abilities
-    return teamAbilities[discordID]['players'][whosTurn[discordID]]
+    return allAbilities[discordID]['players'][whosTurn[discordID]]
   else:
     print("Next turn is for", whosTurn[discordID])
-  return teamAbilities[discordID]['players'][whosTurn[discordID]]
+  return allAbilities[discordID]['players'][whosTurn[discordID]]
 
 
 def enemyTurn(discordID):
@@ -164,6 +62,7 @@ def enemyTurn(discordID):
   # reset back to the beginning of turn order because enemy turn is now over (temp code)
 
   # Note: double check that both enemies can attack before this is called when implementing logic
+  # Every enemy has a certain amount of moves based on their enemyAttributes
 
   whosTurn[discordID] = turnOrder[discordID][0]
   print("Next turn is for", whosTurn[discordID])
@@ -190,6 +89,31 @@ def getAllAbilities(discordID, team, enemies):
   #        ...
   #    }
   #  }
+
+def getStats(discordID, team, enemies):
+  allStats = {
+    "players": {},
+    "enemies": {}
+  }
+
+  for player in team:
+    allStats['players'][player] = {
+      "ehp": characterAttributes[player.lower()][0] + int(characterAttributes[player.lower()][2] * (1.0 if player in rChar else 1.5 if player in srChar else 2.0)),
+      "attack": characterAttributes[player.lower()][1],
+      "evasion": characterAttributes[player.lower()][3],
+      "accuracy": characterAttributes[player.lower()][4],
+    }
+
+  for enemy in enemies:
+    allStats['enemies'][enemy] = {
+      "ehp": enemyAttributes[enemy][0] + int(enemyAttributes[enemy][2] * 1.2),
+      "attack": enemyAttributes[enemy][1],
+      "evasion": enemyAttributes[enemy][4],
+      "accuracy": enemyAttributes[enemy][5],
+    }
+
+  return allStats
+
 
 def calculateTurnOrder(discordID, team, enemies):
   print("Calculating turn order for battle of user", discordID)
