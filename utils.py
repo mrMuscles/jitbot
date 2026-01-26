@@ -66,7 +66,7 @@ characterAttributes = {
     "sr_stephen": [180, 9, 8, 3, 90, "Dropkick", "Consider Intervening", "HIYAAAHHH!"],
     "ssr_jayden": [600, 30, 30, 5, 90, "Punch", "Butler of Swatabi", "Indecision", "Genesis"],
     "sr_homestuck": [180, 18, 15, 5, 90, "Impractical Assailants", "Plunder", "Thief"],
-    "ssr_scottie": [700, 40, 40, 5, 90, "Shield Bash", "Guardian's Shield", "Fortify", "Eternal Watch"],
+    "ssr_scottie": [700, 40, 40, 5, 90, "Fated Strike", "Existential Dread", "Martyrdom", "Nihilism"],
     "sssr_max": ["?", "??", "???", "???", "???", "???", "???", "???", "???", "?????"]
 }
 
