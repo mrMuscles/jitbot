@@ -513,7 +513,6 @@ async def char(interaction: discord.Interaction, character_name: app_commands.Ch
             if char_dev_name == "sssr_max":
                 pass
             else:
-                NO_OWN_PNG = "./broke.png"
                 await interaction.followup.send(file=discord.File(NO_OWN_PNG))
                 return
     else:
@@ -606,7 +605,6 @@ async def recycle(ctx: discord.Interaction, character_name: app_commands.Choice[
                 time.sleep(2)
                 await ctx.delete_original_response()
                 return
-            NO_OWN_PNG = "./broke.png"
             await ctx.response.send_message(file=discord.File(NO_OWN_PNG))
             return
 
@@ -752,7 +750,6 @@ async def team(ctx: discord.Interaction, char1: app_commands.Choice[str] = None,
                     time.sleep(2)
                     await ctx.delete_original_response()
                     return
-                NO_OWN_PNG = "./broke.png"
                 await ctx.response.send_message(file=discord.File(NO_OWN_PNG))
                 return
 
@@ -781,29 +778,29 @@ backgrounds = {
     "purple": "./purple.png"
 }
 characterImages ={
-    "r_abraize": "./r_abraize.png",
-    "r_abraize2": "./r_abraize2.png",
-    "sr_abraize": "./sr_abraize.png",
-    "ssr_abraize": "./ssr_abraize.png",
-    "r_trey": "./r_trey.png",
-    "sr_trey": "./sr_trey.png",
-    "ssr_trey": "./ssr_trey.png",
-    "r_noah": "./r_noah.png",
-    "r_freeman": "./r_freeman.png",
-    "sr_freeman": "./sr_freeman.png",
-    "ssr_jayden": "./ssr_jayden.png",
-    "r_stephen": "./r_stephen.png",
-    "sr_stephen": "./sr_stephen.png",
-    "sr_homestuck": "./sr_homestuck.png",
-    "ssr_scottie": "./ssr_scottie.png"
+    "r_abraize": "./graphics/battle/r_abraize.png",
+    "r_abraize2": "./graphics/battle/r_abraize2.png",
+    "sr_abraize": "./graphics/battle/sr_abraize.png",
+    "ssr_abraize": "./graphics/battle/ssr_abraize.png",
+    "r_trey": "./graphics/battle/r_trey.png",
+    "sr_trey": "./graphics/battle/sr_trey.png",
+    "ssr_trey": "./graphics/battle/ssr_trey.png",
+    "r_noah": "./graphics/battle/r_noah.png",
+    "r_freeman": "./graphics/battle/r_freeman.png",
+    "sr_freeman": "./graphics/battle/sr_freeman.png",
+    "ssr_jayden": "./graphics/battle/ssr_jayden.png",
+    "r_stephen": "./graphics/battle/r_stephen.png",
+    "sr_stephen": "./graphics/battle/sr_stephen.png",
+    "sr_homestuck": "./graphics/battle/sr_homestuck.png",
+    "ssr_scottie": "./graphics/battle/ssr_scottie.png"
 }
 enemyImages = {
-    "RuffianBack": "./ruffianBack.png",
-    "RuffianFront": "./ruffianFront.png",
-    "Grunt": "./grunt.png",
-    "Spearman": "./spearman.png",
-    "Agent": "./agent.png",
-    "Jack Noir": "./jackNoir.png"
+    "RuffianBack": "./graphics/battle/ruffianback.png",
+    "RuffianFront": "./graphics/battle/ruffianfront.png",
+    "Grunt": "./graphics/battle/grunt.png",
+    "Spearman": "./graphics/battle/spearman.png",
+    "Agent": "./graphics/battle/agent.png",
+    "Jack Noir": "./graphics/battle/jacknoir.png"
 }
 enemySpots = {
     "Grunt": (0, 0),
