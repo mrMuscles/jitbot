@@ -82,7 +82,7 @@ def enemyTurn(discordID):
       print(f"Options for ability {selectedAbility} are:", options)
 
       if 'A' in options:
-        print(f"Enemy {enemy} is using attack ability {selectedAbility}")
+        print(f"Option Attack is chosen by {enemy} for {selectedAbility}")
         damageDealt = battleStats[discordID]['enemies'][enemy]['attack']
       if 'F' in options:
         print(f"Enemy {enemy} is targeting player {random.choice(list(battleStats[discordID]['players'].keys()))} using {selectedAbility}")
@@ -175,7 +175,7 @@ def getStats(discordID, team, enemies):
       "attack": enemyAttributes[enemy][1],
       "evasion": enemyAttributes[enemy][4],
       "accuracy": enemyAttributes[enemy][5],
-      "moves": enemyAttributes[enemy][3],
+      "moves": enemyAttributes[enemy][3]
     }
 
   return allStats

@@ -1635,9 +1635,12 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
 
     # Place enemies first (in the background layer)
     enemy_count = 1  # Default to 1 enemy
+    enemyList = []
+
     if enemies.name == "Grunt":
         enemy_image = Image.open(enemyImages[enemies.name])
         background_image.paste(enemy_image, enemySpots[enemies.name], enemy_image)
+        enemyList.append(enemies.name)
     elif enemies.name == "Ruffian":
         # 50/50 if 2 or 1 ruffians show up
         roll = random.random()
@@ -1647,22 +1650,19 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
             ruffianF = Image.open(enemyImages["RuffianFront"])
             background_image.paste(ruffianB, enemySpots["RuffianBack"], ruffianB)
             background_image.paste(ruffianF, enemySpots["RuffianFront"], ruffianF)
+            for i in range(enemy_count):
+                enemyList.append(f"Ruffian{i+1}")
         else:
             ruffianB = Image.open(enemyImages["RuffianBack"])
             background_image.paste(ruffianB, enemySpots["RuffianSolo"], ruffianB)
-    elif enemies.name == "Spearman":
+            enemyList.append("Ruffian1")
+    else:
         enemy_image = Image.open(enemyImages[enemies.name])
         background_image.paste(enemy_image, enemySpots[enemies.name], enemy_image)
-    elif enemies.name == "Agent":
-        enemy_image = Image.open(enemyImages[enemies.name])
-        background_image.paste(enemy_image, enemySpots[enemies.name], enemy_image)
-    elif enemies.name == "Jack Noir":
-        enemy_image = Image.open(enemyImages[enemies.name])
-        background_image.paste(enemy_image, enemySpots[enemies.name], enemy_image)
-
-    enemyList = []
-    for _ in range(enemy_count):
         enemyList.append(enemies.name)
+
+    for a in enemyList:
+        print("ENEMY IN LIST:", a)
 
     # Place team characters dynamically based on their feet positions
     # Reverse order so slot 1 (index 0) is pasted last and appears on top
@@ -1726,8 +1726,6 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
                 button.callback = ability_callback
                 self.add_item(button)
 
-
-
         @discord.ui.button(label="Retreat", style=discord.ButtonStyle.danger, custom_id="retreat_button", row=1)
         async def retreat_button(self, interaction: discord.Interaction, button: discord.ui.Button):
             """Retreat button to end the battle."""
@@ -1749,6 +1747,8 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
 
             await interaction.response.edit_message(view=self)
             await interaction.followup.send("You have retreated from the battle!")
+
+
 
     battle_view = battleView(interaction.user.id)
     await interaction.response.send_message(file=discord.File(combined_image_path), embed=embed, view=battle_view)
@@ -1794,6 +1794,34 @@ HELP_GIF_URL = "https://media.discordapp.net/attachments/796742546910871562/1442
 async def help_command(ctx):
     """Show Help"""
     await ctx.response.send_message(HELP_GIF_URL)
+
+@bot.tree.command(name="embedtest")
+async def embed_test(ctx: discord.Interaction):
+    """Test Embed"""
+    embed = discord.Embed(
+        title="Test Embed",
+        description="This is a test embed. " + "x" * 400,  # Max description length
+        color=0x00ff00,
+        url="https://discord.com"
+    )
+
+    # Add maximum fields (25 is the limit)
+    for i in range(1, 26):
+        embed.add_field(
+            name=f"Field {i}: " + "x" * 25,
+            value="This is the value for field " + str(i) + ". " + "y" * 100,
+            inline=False if i % 2 == 0 else True
+        )
+
+    embed.set_author(name="Author Name " + "z" * 20, url="https://discord.com", icon_url="https://cdn.discordapp.com/embed/avatars/0.png")
+    embed.set_thumbnail(url="https://cdn.discordapp.com/embed/avatars/0.png")
+    embed.set_image(url="https://cdn.discordapp.com/embed/avatars/0.png")
+    embed.set_footer(text="This is a footer. " + "f" * 200, icon_url="https://cdn.discordapp.com/embed/avatars/0.png")
+
+    # Add timestamp
+    embed.timestamp = discord.utils.utcnow()
+
+    await ctx.response.send_message(embed=embed)
 
 @bot.command()
 @commands.is_owner()  # Prevent other people from using the command

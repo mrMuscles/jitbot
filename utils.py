@@ -43,7 +43,8 @@ characterTitles = {
 # Enemy Attributes and Character Attributes (5 basic stats, how many moves they get, plus abilities name)
 # HP, Attack, Defense, Moves, Evasion, Accuracy, Abilities
 enemyAttributes = {
-    "Ruffian": [175, 5, 5, 2, 0, 80, "Punch"],
+    "Ruffian1": [175, 5, 5, 2, 0, 80, "Punch"],
+    "Ruffian2": [175, 5, 5, 2, 0, 80, "Punch"],
     "Grunt": [400, 25, 45, 2, 0, 65, "Punch", "Slam, Deal 15 Damage to all party members"],
     "Spearman": [175, 5, 5, 2, 0, 80, "Punch", "Swipe, Deal 20 damage to all party members", "Stab, Apply 15%% attack damage bonus to self for this turn and deal damage"],
     "Agent": [175, 5, 5, 2, 0, 80, "Punch", "Sneak, Add 15%% evasion to self for next 4 turns, then use Punch"],
@@ -188,7 +189,10 @@ characterAbilities = {
 }
 
 enemyAbilities = {
-  "Ruffian": {
+  "Ruffian1": {
+    "Punch": ['A']                         # Flat Damage using Attack Stat
+  },
+  "Ruffian2": {
     "Punch": ['A']                         # Flat Damage using Attack Stat
   },
   "Grunt": {
