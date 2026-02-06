@@ -219,4 +219,4 @@ SR_HOMESTUCK_GIF = "https://media.discordapp.net/attachments/907662210619289600/
 SSR_SCOTTIE_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1441591428042985492/SSR_SCOTTIE.gif?ex=69551be3&is=6953ca63&hm=9a1141a0f327f2f16ed80b996243679e62491b0fa2b985babdc1bc09d82cccaa&=&width=813&height=524"
 SSSR_MAX_GIF = "https://media.discordapp.net/attachments/1442548563879133357/1460374051834040505/000.png?ex=6966aed2&is=69655d52&hm=2daa8e27abbb1eae7996c33f6b705308567264b3bbaa4bfaa9c889ca95c4e244&=&format=webp&quality=lossless&width=1240&height=698"
 RECYCLE_GIF = "https://media.discordapp.net/attachments/796742546910871562/1455728132240703593/recycled_B.gif?ex=6955c7f8&is=69547678&hm=a047b1b23feab6ea79f4c79303bd9ee6bfba8ba9b800813754e05b9615529585&=&width=678&height=438"
-NO_OWN_PNG = "./graphics/images/broke.png"
+NO_OWN_PNG = "./graphics/broke.png"

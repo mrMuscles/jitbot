@@ -775,7 +775,7 @@ async def team(ctx: discord.Interaction, char1: app_commands.Choice[str] = None,
 # There will be multiple backgrounds to choose from but currently will be randomly decided
 # Using Pillow (PIL) we will create a battle screen image that shows the player's team on the right and the enemy team on the left with background
 backgrounds = {
-    "purple": "./purple.png"
+    "purple": "./graphics/battle/purple.png"
 }
 characterImages ={
     "r_abraize": "./graphics/battle/r_abraize.png",
@@ -1672,7 +1672,7 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
                 background_image.paste(char_image, char_position, char_image)
 
     # save the combined image to a new file
-    combined_image_path = "./battle_screen.png"
+    combined_image_path = "./graphics/battle/battle_screen.png"
     background_image.save(combined_image_path)
 
     embed = discord.Embed(

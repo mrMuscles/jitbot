@@ -53,6 +53,19 @@ def advanceBattle(discordID, abilityUsed):
     print("Next turn is for", whosTurn[discordID])
   return allAbilities[discordID]['players'][whosTurn[discordID]]
 
+def accEvaCheck(discordID, abilityUsed, enemy, target):
+# returns 1 of 3 things, 0 = Hit, 1 = Miss, 2 = Evade
+  check = 3 # so it can error out
+  # accuracy check
+  if random.randint(1, 100) > battleStats[discordID]['enemies'][enemy]['accuracy']:
+    check = 1
+  else:
+    # evasion check
+    if random.randint(1, 100) <= battleStats[discordID]['players'][target]['evasion']:
+      check = 2
+    else:
+      check = 0
+  return check
 
 def enemyTurn(discordID):
   # nothing yet
@@ -67,6 +80,9 @@ def enemyTurn(discordID):
   # need to jump back up here if enemy has moves remaining
 
   for enemy in enemiesInBattle:
+    # this means that it is now the enemies next cycle and need to set back to original
+    if battleStats[discordID]['enemies'][enemy]['moves'] == 0:
+      battleStats[discordID]['enemies'][enemy]['moves'] = enemyAttributes[enemy][3]
     while battleStats[discordID]['enemies'][enemy]['moves'] > 0:
       damageDealt = 0
       targetsChosen = []
@@ -99,18 +115,27 @@ def enemyTurn(discordID):
           print(f"Enemy {enemy} planning to deal {damageDealt} damage to player {target} using ability {selectedAbility}")
 
           # accuracy check
-          if random.randint(1, 100) > battleStats[discordID]['enemies'][enemy]['accuracy']:
-            print(f"Enemy {enemy}'s attack missed player {target}!")
-          else:
+          #if random.randint(1, 100) > battleStats[discordID]['enemies'][enemy]['accuracy']:
+           # print(f"Enemy {enemy}'s attack missed player {target}!")
+          #else:
             # evasion check
-            if random.randint(1, 100) <= battleStats[discordID]['players'][target]['evasion']:
-              print(f"Player {target} evaded the attack from enemy {enemy}!")
-            else:
-              print(f"Enemy {enemy} hit player {target} for {damageDealt} damage!")
+           # if random.randint(1, 100) <= battleStats[discordID]['players'][target]['evasion']:
+            #  print(f"Player {target} evaded the attack from enemy {enemy}!")
+            #else:
+              #print(f"Enemy {enemy} hit player {target} for {damageDealt} damage!")
               # do
-              battleStats[discordID]['players'][target]['ehp'] -= damageDealt
 
-        # battleStats[discordID]['players'][target]['ehp'] -= damageDealt
+          attackCheck = accEvaCheck(discordID, selectedAbility, enemy, target)
+          if attackCheck == 0:
+            print(f"Enemy {enemy} hit player {target} for {damageDealt} damage!")
+            battleStats[discordID]['players'][target]['ehp'] -= damageDealt
+          elif attackCheck == 1:
+            print(f"Enemy {enemy}'s attack missed player {target}!")
+          elif attackCheck == 2:
+            print(f"Player {target} evaded the attack from enemy {enemy}!")
+          else:
+            print(f"HUUUUUUGE error with accuracy evasion check logic")
+
         print(f"Player {target} now has {battleStats[discordID]['players'][target]['ehp']} ehp remaining")
 
       # repeat for number of moves enemy has
@@ -132,7 +157,6 @@ def enemyTurn(discordID):
   whosTurn[discordID] = turnOrder[discordID][0]
   print("Next turn is for", whosTurn[discordID])
   #advanceBattle(discordID, None)
-
 
 
 def getAllAbilities(discordID, team, enemies):
