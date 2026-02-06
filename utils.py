@@ -40,6 +40,45 @@ characterTitles = {
     "sssr_max": "[???] ???"
 }
 
+backgrounds = {
+    "purple": "./graphics/battle/purple.png"
+}
+
+characterImages ={
+    "r_abraize": "./graphics/battle/r_abraize.png",
+    "r_abraize2": "./graphics/battle/r_abraize2.png",
+    "sr_abraize": "./graphics/battle/sr_abraize.png",
+    "ssr_abraize": "./graphics/battle/ssr_abraize.png",
+    "r_trey": "./graphics/battle/r_trey.png",
+    "sr_trey": "./graphics/battle/sr_trey.png",
+    "ssr_trey": "./graphics/battle/ssr_trey.png",
+    "r_noah": "./graphics/battle/r_noah.png",
+    "r_freeman": "./graphics/battle/r_freeman.png",
+    "sr_freeman": "./graphics/battle/sr_freeman.png",
+    "ssr_jayden": "./graphics/battle/ssr_jayden.png",
+    "r_stephen": "./graphics/battle/r_stephen.png",
+    "sr_stephen": "./graphics/battle/sr_stephen.png",
+    "sr_homestuck": "./graphics/battle/sr_homestuck.png",
+    "ssr_scottie": "./graphics/battle/ssr_scottie.png"
+}
+enemyImages = {
+    "RuffianBack": "./graphics/battle/ruffianback.png",
+    "RuffianFront": "./graphics/battle/ruffianfront.png",
+    "Grunt": "./graphics/battle/grunt.png",
+    "Spearman": "./graphics/battle/spearman.png",
+    "Agent": "./graphics/battle/agent.png",
+    "Jack Noir": "./graphics/battle/jacknoir.png"
+}
+enemySpots = {
+    "Grunt": (0, 0),
+    "RuffianBack": (-25, 130),
+    "RuffianFront": (0, 260),
+    "RuffianSolo": (0, 150),
+    "Spearman": (15, 145),
+    "Agent": (20, 150),
+    "Jack Noir": (0, 150)
+}
+
 # Enemy Attributes and Character Attributes (5 basic stats, how many moves they get, plus abilities name)
 # HP, Attack, Defense, Moves, Evasion, Accuracy, Abilities
 enemyAttributes = {
