@@ -41,7 +41,8 @@ characterTitles = {
 }
 
 backgrounds = {
-    "purple": "./graphics/battle/purple.png"
+    "purple1": "./graphics/battle/purple1.png",
+    "purple2": "./graphics/battle/purple2.png"
 }
 
 characterImages ={
