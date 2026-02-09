@@ -989,7 +989,8 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
                 background_image.paste(char_image, char_position, char_image)
 
     # save the combined image to a new file
-    combined_image_path = "./graphics/battle/battle_screen.png"
+    # save to new file based on discord id, example: battle_screen_123456789.png
+    combined_image_path = f"./graphics/battle/battle_screen_{interaction.user.id}.png"
     background_image.save(combined_image_path)
 
     embed = discord.Embed(
@@ -997,7 +998,7 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
         description=f"Battle against **{enemies.name}** is starting!",
         color=0x3f48cc
     )
-    embed.set_image(url="attachment://battle_screen.png")
+    embed.set_image(url=f"attachment://battle_screen_{interaction.user.id}.png")
 
     battleStart = startBattle(interaction.user.id, team, enemyList)
     # set inbattle in mongodb
