@@ -90,7 +90,8 @@ character_choices = [
 
 def r_abraizeEmbed():
     embed = discord.Embed(title=characterTitles["r_abraize"], description="Abraize Masood", color=0x3f48cc)
-    embed.set_image(url=R_ABRAIZE_GIF)
+    # add image from bannerGifs dict
+    embed.set_image(url=bannerGifs["r_abraize_gif"])
     embed.add_field(name="HP:", value=characterAttributes["r_abraize"][0], inline=True)
     embed.add_field(name="ATK:", value=characterAttributes["r_abraize"][1], inline=True)
     embed.add_field(name="DEF:", value=characterAttributes["r_abraize"][2], inline=True)
@@ -513,7 +514,8 @@ async def char(interaction: discord.Interaction, character_name: app_commands.Ch
             if char_dev_name == "sssr_max":
                 pass
             else:
-                await interaction.followup.send(file=discord.File(NO_OWN_PNG))
+                await interaction.response.defer()
+                await interaction.followup.send(file=discord.File(otherImages["no_own_png"]))
                 return
     else:
         await interaction.followup.send("No inventory data found.")
@@ -605,7 +607,8 @@ async def recycle(ctx: discord.Interaction, character_name: app_commands.Choice[
                 time.sleep(2)
                 await ctx.delete_original_response()
                 return
-            await ctx.response.send_message(file=discord.File(NO_OWN_PNG))
+            await interaction.response.defer()
+            await interaction.followup.send(file=discord.File(otherImages["no_own_png"]))
             return
 
         if char_count >= amount:
@@ -671,7 +674,7 @@ async def recycle(ctx: discord.Interaction, character_name: app_commands.Choice[
 
                   #  if rolls_to_add == 0:
                     embed = discord.Embed(title=f"Recycled **{char_title} x{amount}**. Your total rolls is **{rolls_gain + user_data.get('rolls', 0)}** rolls.", color=0x3f48cc)
-                    embed.set_image(url=RECYCLE_GIF)
+                    embed.set_image(url=otherImages["recycle_gif"])
                     await ctx.followup.send(embed=embed)
                 else:  # no_button pressed
                     await ctx.followup.send("Recycling cancelled.")
@@ -750,7 +753,8 @@ async def team(ctx: discord.Interaction, char1: app_commands.Choice[str] = None,
                     time.sleep(2)
                     await ctx.delete_original_response()
                     return
-                await ctx.response.send_message(file=discord.File(NO_OWN_PNG))
+                await ctx.response.defer()
+                await ctx.followup.send(file=discord.File(otherImages["no_own_png"]))
                 return
 
     # Update team in database
