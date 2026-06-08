@@ -67,6 +67,10 @@ def accEvaCheck(discordID, abilityUsed, enemy, target):
       check = 0
   return check
 
+def optionChecks(discordID, options):
+  # would love to move all options to this function somehow in the future
+  pass
+
 def enemyTurn(discordID):
   # nothing yet
   print("Enemy turn for user", discordID)
@@ -125,18 +129,26 @@ def enemyTurn(discordID):
               #print(f"Enemy {enemy} hit player {target} for {damageDealt} damage!")
               # do
 
+          loggedMove = ""
           attackCheck = accEvaCheck(discordID, selectedAbility, enemy, target)
           if attackCheck == 0:
-            print(f"Enemy {enemy} hit player {target} for {damageDealt} damage!")
+            loggedMove = f"Enemy {enemy} hit player {target} for {damageDealt} damage!"
+            print(loggedMove)
             battleStats[discordID]['players'][target]['ehp'] -= damageDealt
           elif attackCheck == 1:
-            print(f"Enemy {enemy}'s attack missed player {target}!")
+            loggedMove = f"Enemy {enemy}'s attack missed player {target}!"
+            print(loggedMove)
           elif attackCheck == 2:
-            print(f"Player {target} evaded the attack from enemy {enemy}!")
+            loggedMove = f"Player {target} evaded the attack from enemy {enemy}!"
+            print(loggedMove)
           else:
             print(f"HUUUUUUGE error with accuracy evasion check logic")
 
         print(f"Player {target} now has {battleStats[discordID]['players'][target]['ehp']} ehp remaining")
+
+        # here add to embed log
+        #logEnemyMove(discordID, loggedMove)
+
 
       # repeat for number of moves enemy has
       enemyMoves = battleStats[discordID]['enemies'][enemy]['moves']

@@ -1007,6 +1007,7 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
         {"$set": {"inBattle": True}}
     )
 
+    # leaving this as a class inside main.py for now as its weirdly used
     # it seems that you need to have a "view" to allow buttons
     class battleView(discord.ui.View):
         def __init__(self, user_id: int):
@@ -1041,6 +1042,7 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
                 button.callback = ability_callback
                 self.add_item(button)
 
+
         @discord.ui.button(label="Retreat", style=discord.ButtonStyle.danger, custom_id="retreat_button", row=1)
         async def retreat_button(self, interaction: discord.Interaction, button: discord.ui.Button):
             """Retreat button to end the battle."""
@@ -1062,7 +1064,6 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
 
             await interaction.response.edit_message(view=self)
             await interaction.followup.send("You have retreated from the battle!")
-
 
 
     battle_view = battleView(interaction.user.id)
