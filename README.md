@@ -3,6 +3,7 @@
 **The ultimate Discord Jitstuck GACHA GAME experience!**
 
 ## Installation Requirements:
+ - "**Visual Studio Code**": I suggest you get this because you can add your github account directly to the IDE and you can talk to the github copilot AI directly inside of the codespace and it'll automatically read the code (so you don't have to copy and paste into chatgpt or something else)
  - Python 3.14.0 or something similar works
  - Mongodb --> Currently it points to localhost
  - Make sure you get MongoDB compass as itll be easier to use (its the GUI version)

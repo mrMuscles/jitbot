@@ -943,7 +943,7 @@ async def battle(interaction: discord.Interaction,enemies:app_commands.Choice[st
     # get a random background from the backgrounds hashmap
     background_name, background_file = random.choice(list(backgrounds.items()))
 
-    # comnbine background and r_abraize images ontop one another using PIL
+    # comnbine background and sprite images ontop one another using PIL
     background_image = Image.open(background_file)
     background_size = background_image.size
 
