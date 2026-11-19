@@ -51,11 +51,12 @@ def main():
         character_files = [
             "r_abraize.png", "r_abraize2.png", "sr_abraize.png", "ssr_abraize.png",
             "r_trey.png", "sr_trey.png", "ssr_trey.png",
-            "r_noah.png",
+            "r_noah.png", "sr_noah.png",
             "r_freeman.png", "sr_freeman.png",
             "ssr_jayden.png",
             "r_stephen.png", "sr_stephen.png",
-            "sr_homestuck.png",
+            "sr_homestuck.png", "r_homestuck.png",
+            "r_max.png", "r_jaiden.png",
             "ssr_scottie.png"
         ]
         

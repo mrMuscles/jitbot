@@ -4,18 +4,18 @@
 Technically every character that exists HERE must actually exist below
 abraizeChar = ["r_abraize", "r_abraize2", "sr_abraize", "ssr_abraize"]
 treyChar = ["r_trey", "ssr_trey"]
-noahChar = ["r_noah"]
+noahChar = ["r_noah", "sr_noah"]
 freemanChar = ["r_freeman", "sr_freeman"]
 stephenChar = ["r_stephen", "sr_stephen"]
-jaydenChar = ["ssr_jayden"]
-homestuckChar = ["sr_homestuck"]
+jaydenChar = ["ssr_jayden", "r_jaiden"]
+homestuckChar = ["r_homestuck", "sr_homestuck"]
 scottieChar = ["ssr_scottie"]
-maxChar = ["sssr_max"]
+maxChar = ["r_max", "sssr_max"]
 '''
 
 # Characters that exists here are every character in the game but in each section
-rChar = ["r_abraize", "r_abraize2", "r_trey", "r_noah", "r_freeman", "r_stephen"]
-srChar = ["sr_freeman", "sr_stephen", "sr_homestuck", "sr_abraize", "sr_trey"]
+rChar = ["r_abraize", "r_abraize2", "r_trey", "r_noah", "r_freeman", "r_stephen", "r_homestuck", "r_max", "r_jaiden"]
+srChar = ["sr_freeman", "sr_stephen", "sr_homestuck", "sr_abraize", "sr_trey", "sr_noah"]
 ssrChar = ["ssr_abraize", "ssr_trey", "ssr_jayden"]
 specialChar = ["ssr_scottie"]
 secretChar = ["sssr_max"]
@@ -30,12 +30,16 @@ characterTitles = {
     "sr_trey": "[Heavy Sleeper] Treyvaughn Lewis",
     "ssr_trey": "[Seeker of Silence] Treyvaughn Lewis",
     "r_noah": "[pillagingPirate] Noah Cave",
+    "sr_noah": "[S'all Good, Man] Noah Cave",
     "r_freeman": "[Who I am to Me] Freeman",
     "sr_freeman": "[Freedom in Jeopardy] Freeman",
     "r_stephen": "[You Marlowe?] Stephen Goraynov",
     "sr_stephen": "[Master of Intervention] Stephen Goraynov",
     "ssr_jayden": "[Sworn Protectorate of Creation] Jayden Ceballos",
     "sr_homestuck": "[Thief in God's Clothing] Homestuck",
+    "r_homestuck": "[Tour of a Lifetime] Homestuck",
+    "r_max": "[I can make a-] Max Yakuvobich",
+    "r_jaiden": "[Picked up, Packed up] Jaiden Ceballos",
     "ssr_scottie": "[Overwhelming Dread] Scottie Jenkins",
     "sssr_max": "[???] ???"
 }
@@ -54,21 +58,25 @@ characterImages ={
     "sr_trey": "./graphics/battle/sr_trey.png",
     "ssr_trey": "./graphics/battle/ssr_trey.png",
     "r_noah": "./graphics/battle/r_noah.png",
+    "sr_noah": "./graphics/battle/sr_noah.png",   # cut out of r_noah2.png (that file has 4 characters in it)
     "r_freeman": "./graphics/battle/r_freeman.png",
     "sr_freeman": "./graphics/battle/sr_freeman.png",
     "ssr_jayden": "./graphics/battle/ssr_jayden.png",
     "r_stephen": "./graphics/battle/r_stephen.png",
     "sr_stephen": "./graphics/battle/sr_stephen.png",
     "sr_homestuck": "./graphics/battle/sr_homestuck.png",
-    "ssr_scottie": "./graphics/battle/ssr_scottie.png"
+    "ssr_scottie": "./graphics/battle/ssr_scottie.png",
+    "r_homestuck": "./graphics/battle/r_homestuck.png",
+    "r_max": "./graphics/battle/r_max.png",
+    "r_jaiden": "./graphics/battle/r_jaiden.png"
 }
 enemyImages = {
-    "RuffianBack": "./graphics/battle/ruffianback.png",
-    "RuffianFront": "./graphics/battle/ruffianfront.png",
+    "RuffianBack": "./graphics/battle/ruffianBack.png",   # file names match the capital letters of the real files
+    "RuffianFront": "./graphics/battle/ruffianFront.png", # (Windows doesn't care, but Linux / Mac servers can't find them otherwise)
     "Grunt": "./graphics/battle/grunt.png",
     "Spearman": "./graphics/battle/spearman.png",
     "Agent": "./graphics/battle/agent.png",
-    "Jack Noir": "./graphics/battle/jacknoir.png"
+    "Jack Noir": "./graphics/battle/jackNoir.png"
 }
 
 # Character Banner GIFs
@@ -90,6 +98,7 @@ R_TREY_GIF = "https://media.discordapp.net/attachments/1426812344549380136/14422
 SR_TREY_GIF = "https://media.discordapp.net/attachments/907662210619289600/1442648569579307180/SR_TREY.gif?ex=6941396e&is=693fe7ee&hm=d12a52705f4952d3860d273dcce43f3598f971d5d581209f61fd46108823194d&=&width=813&height=524"
 SSR_TREY_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1438298186409185393/SSR_TREY.gif?ex=692ace51&is=69297cd1&hm=705ffe6482d8c46a88742a82e6565c28ff53cbba9ea15eebe990dfacde708469&=&width=813&height=524"
 R_NOAH_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1438298195829719193/R_NOAH.gif?ex=692ace54&is=69297cd4&hm=a4ab137787708b382bd26b0659a39b768dece0b7d0eb03898b4fe4b180428133&=&width=601&height=438"
+R_NOAH2_GIF = "https://cdn.discordapp.com/attachments/907662210619289600/1572809217637621830/SR_NOAH_3.gif?ex=6affb83a&is=6afe66ba&hm=cd228f4e33d18f6ec0f959a5bb3a79fc35dcbe6c22fddb36663aed0f72f05298&"
 R_FREEMAN_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1442262942660952268/R_FREEMAN.gif?ex=692aba49&is=692968c9&hm=3f1edc05a01b0c793ab7ddfe3519054630c1523e68b5c29ec5d4be6624d0e1c0&=&width=813&height=524"
 SR_FREEMAN_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1438298206193586187/SR_FREEMAN.gif?ex=692ace56&is=69297cd6&hm=6e42e1d45a353ffc60916f54593933273fea88e2d69d400c91f8c6899172174e&=&width=678&height=438"
 R_STEPHEN_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1443821437378105444/R_STEPHEN.gif?ex=692b1fbf&is=6929ce3f&hm=97986106339c3febd0bb243c25c13f870c331eb2376c2b3bcefc053fac64e26b&=&width=813&height=524"
@@ -98,6 +107,9 @@ SSR_JAYDEN_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1
 SR_HOMESTUCK_GIF = "https://media.discordapp.net/attachments/907662210619289600/1441689825911505026/SR_HOMESTUCK.gif?ex=6941b107&is=69405f87&hm=181544c05734a721ea53bbe630dcb4b25ed7b95327661a807b97bdba81cc7506&=&width=813&height=524"
 SSR_SCOTTIE_GIF = "https://media.discordapp.net/attachments/1426812344549380136/1441591428042985492/SSR_SCOTTIE.gif?ex=69551be3&is=6953ca63&hm=9a1141a0f327f2f16ed80b996243679e62491b0fa2b985babdc1bc09d82cccaa&=&width=813&height=524"
 SSSR_MAX_GIF = "https://media.discordapp.net/attachments/1442548563879133357/1460374051834040505/000.png?ex=6966aed2&is=69655d52&hm=2daa8e27abbb1eae7996c33f6b705308567264b3bbaa4bfaa9c889ca95c4e244&=&format=webp&quality=lossless&width=1240&height=698"
+R_HOMESTUCK_GIF = "https://media.discordapp.net/attachments/907662210619289600/1572833434982817802/R_HOMESTUCK.gif?ex=6affcec8&is=6afe7d48&hm=ca625cfb04880771fd058c6b5d9ff076c2781b5c117970f0a9152d4ade002888"
+R_MAX_GIF = "https://media.discordapp.net/attachments/907662210619289600/1572833434357727273/R_MAX2.gif?ex=6affcec8&is=6afe7d48&hm=e52418210d467478e525be4e53f2c69e93381a93178ec72f27427d9ffb7f2005"
+R_JAIDEN_GIF = "https://media.discordapp.net/attachments/907662210619289600/1572833434643202190/R_JAIDEN.gif?ex=6affcec8&is=6afe7d48&hm=2734c1b5863d9073f6402b039175ba1e8a9f77356c484ef07962dffd7b6f7933"
 
 
 
@@ -114,31 +126,50 @@ enemySpots = {
 # Enemy Attributes and Character Attributes (5 basic stats, how many moves they get, plus abilities name)
 # HP, Attack, Defense, Moves, Evasion, Accuracy, Abilities
 enemyAttributes = {
-    "Ruffian1": [175, 5, 5, 2, 0, 80, "Punch"],
-    "Ruffian2": [175, 5, 5, 2, 0, 80, "Punch"],
+    "Ruffian1": [125, 5, 5, 2, 0, 80, "Punch"],
+    "Ruffian2": [125, 5, 5, 2, 0, 80, "Punch"],
     "Grunt": [400, 25, 45, 2, 0, 65, "Punch", "Slam, Deal 15 Damage to all party members"],
     "Spearman": [175, 5, 5, 2, 0, 80, "Punch", "Swipe, Deal 20 damage to all party members", "Stab, Apply 15%% attack damage bonus to self for this turn and deal damage"],
-    "Agent": [175, 5, 5, 2, 0, 80, "Punch", "Sneak, Add 15%% evasion to self for next 4 turns, then use Punch"],
+    "Agent": [175, 15, 5, 2, 0, 80, "Punch", "Sneak, Add 15%% evasion to self for next 4 turns, then use Punch"],
     "Jack Noir": [1000, 30, 10, 3, 5, 90, "Stab", "Shiv, Deal damage and apply bleed to player (-3% hp per turn) for one turn, this can stack", "Slash, Deal only 5 damage to all party members, but apply bleed to all party members for one turn.", "Extra Passive: Attack lowest health party member each turn"]
 }
+
+# Grist the player gets for WINNING a /battle (losing, retreating or timing out gives nothing)
+# The names are the /battle choices. "Ruffian" is when 1 ruffian shows up, "Ruffian x2" is when 2 show up
+# A new enemy needs a line here too, otherwise beating it gives 0 Grist
+gristRewards = {
+    "Ruffian": 5,
+    "Ruffian x2": 7,
+    "Spearman": 7,
+    "Agent": 9,
+    "Grunt": 15,
+    "Jack Noir": 35,
+}
+
+# How much Grist 1 roll costs in /item store (a whole number above 0)
+rollPrice = 15
 # Only Get the 5 stats from here (abilities are defined in characterAbilities)
 # HP, Attack, Defense, Evasion, Accuracy, Abilities
 characterAttributes = {
-    "r_abraize": [200, 10, 10, 3, 90, "Punch", "Sleep", "Missing Assignments"],
-    "r_abraize2": [200, 10, 10, 3, 90, "Punch", "Eat Note", "Productivity Time"],
-    "sr_abraize":  [200, 15, 20, 3, 90, "Punch", "Slow", "Attempt"],
-    "ssr_abraize": [600, 35, 35, 3, 90, "Accelerated Punch", "Fast Forward", "Rewind", "Universal Stabilizer"],
-    "r_trey": [250, 12, 8, 3, 90, "Punch", "Irish Goodbye", "Cheesy Fries"],
-    "sr_trey": [300, 15, 20, 3, 75, "Punch", "Drowsy", "Whispers from Beyond"],
-    "ssr_trey": [750, 30, 25, 30, 90, "Punch", "Cloak and Dagger", "Shroud", "Reality Sink"],
-    "r_noah": [180, 10, 8, 3, 90, "Punch", "Fiddle", "Bo"],
-    "r_freeman": [180, 8, 8, 10, 90, "Slap", "Ponder", "SMASH!"],
+    "r_abraize": [120, 10, 10, 3, 90, "Punch", "Sleep", "Missing Assignments"],
+    "r_abraize2": [120, 10, 10, 3, 90, "Punch", "Eat Note", "Productivity Time"],
+    "sr_abraize":  [220, 15, 20, 3, 90, "Punch", "Slow", "Attempt"],
+    "ssr_abraize": [400, 35, 35, 3, 90, "Accelerated Punch", "Fast Forward", "Rewind", "Universal Stabilizer"],
+    "r_trey": [150, 12, 8, 3, 90, "Punch", "Irish Goodbye", "Cheesy Fries"],
+    "sr_trey": [250, 15, 20, 3, 75, "Punch", "Drowsy", "Whispers from Beyond"],
+    "ssr_trey": [425, 30, 25, 30, 90, "Punch", "Cloak and Dagger", "Shroud", "Reality Sink"],
+    "r_noah": [125, 10, 8, 3, 90, "Punch", "Fiddle", "Bo"],
+    "sr_noah": [180, 15, 8, 3, 92, "Gavel Strike", "Mock", "Defense Lawyer"],
+    "r_freeman": [100, 8, 8, 10, 90, "Slap", "Ponder", "SMASH!"],
     "sr_freeman": [180, 8, 8, 10, 90, "Pistol Whip", "Shoot", "Hide"],
-    "r_stephen": [180, 9, 8, 3, 90, "Dropkick", "Light up", "Lock the fuck in"],
+    "r_stephen": [130, 9, 8, 3, 90, "Dropkick", "Light up", "Lock the fuck in"],
     "sr_stephen": [180, 9, 8, 3, 90, "Dropkick", "Consider Intervening", "HIYAAAHHH!"],
-    "ssr_jayden": [600, 30, 30, 5, 90, "Punch", "Butler of Swatabi", "Indecision", "Genesis"],
+    "ssr_jayden": [400, 30, 30, 5, 90, "Punch", "Butler of Swatabi", "Indecision", "Genesis"],
     "sr_homestuck": [180, 18, 15, 5, 90, "Impractical Assailants", "Plunder", "Thief"],
-    "ssr_scottie": [700, 40, 40, 5, 90, "Fated Strike", "Existential Dread", "Martyrdom", "Nihilism"],
+    "ssr_scottie": [320, 40, 40, 5, 90, "Fated Strike", "Existential Dread", "Martyrdom", "Nihilism"],
+    "r_homestuck": [140, 11, 7, 5, 90, "Punch", "Spotlight Shift", "Rules for thee"],
+    "r_max": [165, 10, 13, 2, 90, "Punch", "Brick Eating", "Tour Alliance"],
+    "r_jaiden": [120, 9, 10, 3, 90, "Punch", "Pick Up", "Commitment and Fuck"],
     "sssr_max": ["?", "??", "???", "???", "???", "???", "???", "???", "???", "?????"]
 }
 
@@ -171,7 +202,9 @@ characterAttributes = {
 # Option B = Area of Effect at Enemies
 # Option C = Area of Effect at Teammates
 # Option D = Buff: the whole team with Option C, one picked teammate with Option G, otherwise yourself
-#            numbers: "buff": {stat: %}, "turns", "heal" = % of max hp healed, "debuffImmune" = can't be debuffed while it lasts
+#            numbers: "buff": {stat: %}, "turns", "heal" = % of max hp healed, "debuffImmune" = can't be debuffed while it lasts,
+#                     "damageImmune" = can't take any damage while it lasts (hits, Burn, Bleed), paying your own hp still works,
+#                     "sureHitsNextTurn": "status name" = every attack they make on their next turn hits (R Jaiden's Commitment)
 # Option E = Debuff: every enemy with Option B, one picked enemy with Option F (or the enemy hit by Option A),
 #            with no target letter it lands on yourself (or a random teammate with Option O "randomAlly")
 #            numbers: "debuff": {stat: %}, "turns"
@@ -183,6 +216,7 @@ characterAttributes = {
 # Option I = Stacks of same kind on targets which works with 1 or multiple targets
 #            numbers: "stacks": {"name", "add", "max", "turns", "perStack": {stat: % for each stack}, "resetOnOtherMove", "loseStackWhenHit"}
 #                     "consumeStacks": {"name", "bonusPerStack"} = uses up all the stacks for extra % damage
+#                                      {"name", "flatPerStack"}  = uses up all the stacks for extra flat damage (+10 = 10 more damage per stack)
 #                     "buffPerStack": {"name", "stats"} = the buff is multiplied by how many stacks you have
 # Option J = Rewind (SSR Abraize): the team's hp, buffs and debuffs go back to how they were at the start of the previous turn
 # Option K = Sleep (R Abraize): skip your next turn then wake up with a buff, numbers: "sleepTurns", "wakeBuff": {stat: %}, "wakeTurns"
@@ -194,6 +228,9 @@ characterAttributes = {
 # Option N = Interrupt: "interrupt": {"name", "chance", "guardsAllies", "counter"} = a status with a chance to cancel an enemy
 #            attack, it is used up once it works (R Noah's Interfere protects Noah, SR Freeman's Nervous protects the whole team)
 # Option O = Luck: "chance" = % the move works at all, "outcomes" = list of moves and 1 gets picked at random,
+#            "weights" = how likely each outcome is (same order as outcomes, leave it out for equal chances),
+#            "outcomeText" (inside an outcome) = what the battle log says when that outcome is picked,
+#            an F next to the outcomes lets the player pick the enemy first (R Jaiden's Pick Up),
 #            "randomAlly" = the debuff lands on a random teammate, "dice": [sides, damage for each number rolled]
 # Option P = Doom Marks (SSR Scottie): "doom" = "fatedStrike" / "dread" / "martyrdom" / "nihilism"
 # Option Q = Jack Noir Special Passive (Attack lowest health target each turn)
@@ -211,7 +248,10 @@ characterAttributes = {
 #   "turns" = how long buffs/debuffs last (default 1, 0 = only for the rest of the current turn)
 #   "once" = can only be used once per battle (ultimates)
 #   "extraTurn" = the user goes again straight away
-#   "selfDamage" = flat hp the user pays, "selfHeal" = % of max hp the user heals
+#   "selfDamage" = flat hp the user pays, "selfHeal" = % of max hp the user heals, "selfHealHP" = flat hp the user heals
+#   "allyCost" = every other teammate pays that % of their max hp (it can't knock them out)
+#   "skipEnemyTurn" = the enemies skip their next turn (R Homestuck's Rules for thee)
+#   "missNextAttack": "status name" = the user's next attack misses no matter what (R Max's Brick Eating)
 #   "accuracy" = replaces the user's accuracy for this move (and makes a move without Option A roll to hit too)
 #   "ranged" = it is a ranged attack (these miss while a Void Spot is on the field)
 #   "buffName" / "debuffName" = name shown in the embed for the buff/debuff (like "Warped")
@@ -266,7 +306,7 @@ characterAbilities = {
   "sr_trey": {
     "Punch": ['A', 'F'],                                            # Flat Damage using Attack Stat
     "Drowsy": ['B', 'E', {"debuff": {"DD": 10}, "turns": 1}],       # -10% accuracy to all enemies for 1 turn
-    "Whispers from Beyond": ['C', 'D', {"buff": {"DD": 10}, "turns": 2}]  # +10% accuracy for the team for 2 turns
+    "Whispers from Beyond": ['C', 'D', 'H', {"buff": {"DD": 10}, "turns": 2, "cooldown": 1}]  # +10% accuracy for the team for 2 turns, 1 turn cooldown
   },
   "ssr_trey": {
     "Punch": ['A', 'F'],                                            # Flat Damage using Attack Stat
@@ -282,6 +322,13 @@ characterAbilities = {
     "Punch": ['A', 'F'],                                            # Flat Damage using Attack Stat
     "Fiddle": ['E', 'F', {"debuff": {"DD": 5}, "turns": 2}],        # -5% accuracy to 1 enemy for 2 turns
     "Bo": ['H', 'N', {"interrupt": {"name": "Interfere", "chance": 50}, "cooldown": 2}]  # 50% to cancel the next hit on self, 2 turn cooldown
+  },
+  "sr_noah": {
+    "Gavel Strike": ['A', 'F'],                                     # Flat Damage using Attack Stat
+    # -15% accuracy to all enemies and enemies have to attack you, both for 1 turn
+    "Mock": ['B', 'E', 'L', {"debuff": {"DD": 15}, "turns": 1, "taunt": 1}],
+    # the whole team can't take any damage for the rest of this turn, 3 turn cooldown
+    "Defense Lawyer": ['C', 'D', 'H', {"damageImmune": True, "turns": 0, "cooldown": 3}]
   },
   "r_freeman": {
     "Slap": ['A', 'F'],                                             # Flat Damage using Attack Stat
@@ -305,7 +352,7 @@ characterAbilities = {
   "sr_stephen": {
     "Dropkick": ['A', 'F'],                                         # Flat Damage using Attack Stat
     "Consider Intervening": ['I', {"stacks": {"name": "Considering", "add": 1, "turns": 3}}],  # +1 Considering stack (lasts 3 turns)
-    "HIYAAAHHH!": ['A', 'F', 'I', {"consumeStacks": {"name": "Considering", "bonusPerStack": 10}}]  # +10% damage per stack, uses them up
+    "HIYAAAHHH!": ['A', 'F', 'I', {"consumeStacks": {"name": "Considering", "flatPerStack": 10}}]  # +10 damage per stack, uses them up
   },
   "ssr_jayden": {
     "Punch": ['A', 'F'],                                            # Flat Damage using Attack Stat
@@ -337,6 +384,34 @@ characterAbilities = {
     "Martyrdom": ['D', 'L', 'P', {"buff": {"CC": 30}, "turns": 2, "taunt": 2, "doom": "martyrdom", "explodePower": 150}],
     # Ultimate: from turn 4 with 5+ Doom Marks out, for 3 turns every enemy hurts itself, hits an ally or lies still each turn
     "Nihilism": ['B', 'P', {"doom": "nihilism", "requiresRound": 4, "requiresMarks": 5, "turns": 3, "once": True}]
+  },
+  "r_homestuck": {
+    "Punch": ['A', 'F'],                                            # Flat Damage using Attack Stat
+    # enemies have to attack you for 1 turn and you take 5% less damage this turn (+5 DEF)
+    "Spotlight Shift": ['D', 'L', {"buff": {"CC": 5}, "turns": 0, "taunt": 1}],
+    # the enemies skip their next turn, but every other teammate loses 10% of their max hp (it can't knock them out), 2 turn cooldown
+    "Rules for thee": ['H', {"skipEnemyTurn": True, "allyCost": 10, "cooldown": 2}]
+  },
+  "r_max": {
+    "Punch": ['A', 'F'],                                            # Flat Damage using Attack Stat
+    # heal 25 hp, but the next attack misses no matter what
+    "Brick Eating": [{"selfHealHP": 25, "missNextAttack": "Full of Brick"}],
+    # pick a teammate: +25% to every stat for 1 turn, 2 turn cooldown
+    "Tour Alliance": ['D', 'G', 'H', {"buff": {"AA": 25, "BB": 25, "CC": 25, "DD": 25, "EE": 25}, "turns": 1, "cooldown": 2}]
+  },
+  "r_jaiden": {
+    "Punch": ['A', 'F'],                                            # Flat Damage using Attack Stat
+    # throw a box at the enemy you pick (ranged), what's inside decides the damage, "weights" = the % chance of each box
+    "Pick Up": ['F', 'O', {"weights": [15, 15, 30, 20, 19, 1], "outcomes": [
+      ['A', 'F', {"damage": 1, "ranged": True, "outcomeText": "the box had a teddy bear."}],
+      ['A', 'F', {"damage": 15, "ranged": True, "outcomeText": "the box had a lovely vase."}],
+      ['A', 'F', {"damage": 10, "ranged": True, "outcomeText": "the box had school supplies."}],
+      ['A', 'F', {"damage": 15, "ranged": True, "outcomeText": "the box had a precious game console."}],
+      ['A', 'F', {"damage": 2, "ranged": True, "outcomeText": "the box had rolled up posters."}],
+      ['A', 'F', {"damage": 50, "ranged": True, "outcomeText": "the box had a live beartrap."}]
+    ]}],
+    # pick a teammate: every attack they make on their next turn is guaranteed to hit
+    "Commitment and Fuck": ['D', 'G', {"sureHitsNextTurn": "Committed"}]
   }
 }
 
@@ -349,7 +424,7 @@ enemyAbilities = {
   },
   "Grunt": {
     "Punch": ['A', 'F'],                                            # Flat Damage using Attack Stat
-    "Slam": ['A', 'B', {"damage": 15}]                              # 15 damage to all party members
+    "Slam": ['A', 'B', {"damage": 20}]                              # 20 damage to all party members
   },
   "Spearman": {
     "Punch": ['A', 'F'],                                            # Flat Damage using Attack Stat

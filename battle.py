@@ -1,6 +1,7 @@
 import copy
 import random
 from utils import *
+import item_helper  # the equipped item (items are in MongoDB), item_helper.py does what it does in battle
 
 # Store global variable of turn order based on discord id so that battles dont get mixed up between users at same time
 turnOrder = {}
@@ -24,7 +25,7 @@ LOG_LIMIT = 40      # only remember the newest lines of each battle log (main.py
 # START / ADVANCE / END (the functions main.py calls)
 # ============================================================================
 
-def startBattle(discordID, team, enemies):
+def startBattle(discordID, team, enemies, item=None):
   print("Battle Started with user", discordID)
   allAbilities[discordID] = getAllAbilities(discordID, team, enemies)
   turnOrder[discordID] = calculateTurnOrder(discordID, team, enemies)
@@ -40,15 +41,22 @@ def startBattle(discordID, team, enemies):
     "usedOnce": set(),        # (side, unit, ability) of "once" moves that were already used (ultimates)
     "snapshots": [],          # hp + effects at the start of the last 2 rounds (Option J Rewind)
     "voidSpot": None,         # SSR Trey's Reality Sink (Option M)
+    "skipEnemyTurn": False,   # R Homestuck's Rules for thee: the next enemy turn gets skipped
     "pending": [],            # log lines waiting for the current move's line to be written first (defeats, explosions)
     "result": None,           # "victory" or "defeat" once the battle is decided
+    "item": None,             # the equipped item (item_helper.battleStart fills this in)
   }
   print("Turn order is:", turnOrder[discordID])
 
   enemyNames = " & ".join(displayName(discordID, 'enemies', enemy) for enemy in enemies)
   addLog(discordID, f"⚔️ The battle against **{enemyNames}** begins!")
+  item_helper.battleStart(discordID, item)  # the equipped item's bonuses for the team
   startRound(discordID)
   whosTurn[discordID] = turnOrder[discordID][0]
+  if item_helper.teamSkipsTurn(discordID):
+    # the item (Protein Brick) made the team skip round 1: going on from the last team member runs the enemy turn first
+    whosTurn[discordID] = turnOrder[discordID][turnOrder[discordID].index("0") - 1]
+    nextTurn(discordID)
 
   print("Battle Start Configuration Finished", discordID)
   # should return character abilities from characterattributes for first character on team
@@ -122,6 +130,8 @@ def nextTurn(discordID):
   for _ in range(1000):  # safety net so a logic bug can't freeze the bot
     if battleInfo[discordID]['result']:
       return
+    if index == 0 and item_helper.teamSkipsTurn(discordID):
+      index = order.index("0")  # the item (Protein Brick) made the whole team skip this round, so the enemies go
     if index >= len(order) or order[index] == "0":
       print("Enemy turn, no abilities to return")
       enemyTurn(discordID)
@@ -145,8 +155,14 @@ def enemyTurn(discordID):
   info = battleInfo[discordID]
   info['phase'] = 'enemies'
 
-  # get first enemy then next enemy until all have gone
-  for enemy in list(battleStats[discordID]['enemies'].keys()):
+  # R Homestuck's Rules for thee: the enemies don't get to do anything this turn
+  skipped = info['skipEnemyTurn']
+  info['skipEnemyTurn'] = False
+  if skipped:
+    addLog(discordID, "⛔ The enemies' turn was skipped!")
+
+  # get first enemy then next enemy until all have gone (nobody when the turn was skipped)
+  for enemy in ([] if skipped else list(battleStats[discordID]['enemies'].keys())):
     if info['result']:
       break
     if not isAlive(discordID, 'enemies', enemy):
@@ -210,6 +226,7 @@ def startRound(discordID):
   info['phase'] = 'players'
   takeSnapshot(discordID)
   addLog(discordID, f"**— Round {info['round']} —**")
+  item_helper.roundStart(discordID)  # items that do something at the start of a round (heals, bonuses wearing off)
 
 def endRound(discordID):
   # End of a full round: lingering effects tick (Option M), the Void Spot grows, then every timer counts down by 1
@@ -230,6 +247,8 @@ def endRound(discordID):
     if effects[0]['heal']:
       healed = healUnit(discordID, side, unit, amount)
       addLog(discordID, f"💚 **{who}** heals {healed} HP from {name}")
+    elif isDamageImmune(discordID, side, unit):
+      addLog(discordID, f"🛡️ **{who}** is protected from {name}{stacks}")  # SR Noah's Defense Lawyer
     else:
       dealt = dealDamage(discordID, side, unit, amount)
       icon = "🔥" if name == "Burn" else "🩸"
@@ -319,14 +338,18 @@ def optionChecks(discordID, side, actor, abilityName, options, chosenTarget=None
 
   # Option I: stacks like "Accelerated" disappear as soon as the user does a different move
   clearStacksOnOtherMove(discordID, side, actor, params)
+  # R Jaiden's Commitment: a Committed unit can't miss during this turn, then it runs out (taken off further down)
+  committed = [effect for effect in getEffects(discordID, side, actor) if effect.get('sureHits')]
 
   extraTurn = False
   if 'O' in letters and 'chance' in params and random.randint(1, 100) > params['chance']:
     # Option O: luck based move that didn't work this time
     move['parts'].append(params.get('failText', "but nothing happened..."))
   elif 'O' in letters and params.get('outcomes'):
-    # Option O: pick 1 of the outcomes at random and do that instead
-    outcomeLetters, outcomeParams = splitOptions(random.choice(params['outcomes']))
+    # Option O: pick 1 of the outcomes at random and do that instead ("weights" = how likely each one is, otherwise all equal)
+    outcomeLetters, outcomeParams = splitOptions(random.choices(params['outcomes'], weights=params.get('weights'))[0])
+    if outcomeParams.get('outcomeText'):
+      move['parts'].append(outcomeParams['outcomeText'])
     extraTurn = resolveMove(discordID, move, outcomeLetters, outcomeParams, chosenTarget)
   else:
     extraTurn = resolveMove(discordID, move, letters, params, chosenTarget)
@@ -337,6 +360,8 @@ def optionChecks(discordID, side, actor, abilityName, options, chosenTarget=None
     info['cooldowns'][key] = info['round'] + params.get('cooldown', 1) + 1
   if params.get('once'):
     info['usedOnce'].add(key)
+  for effect in committed:
+    removeEffect(discordID, effect)
 
   writeMoveLog(discordID, move)
   return extraTurn
@@ -359,6 +384,22 @@ def resolveMove(discordID, move, letters, params, chosenTarget):
     parts.append(f"paid {payHP(discordID, side, actor, params['selfDamage'])} HP")
   if params.get('selfHeal'):
     parts.append(f"healed {healUnit(discordID, side, actor, maxHP(discordID, side, actor) * params['selfHeal'] / 100)} HP")
+  if params.get('selfHealHP'):
+    parts.append(f"healed {healUnit(discordID, side, actor, params['selfHealHP'])} HP")
+  if params.get('missNextAttack'):
+    # R Max's Brick Eating: the next attack misses no matter what (hostileMove uses it up)
+    addStatus(discordID, side, actor, params['missNextAttack'], addStacks=0, sureMiss=True)
+    parts.append("the next attack will miss")
+  if params.get('skipEnemyTurn'):
+    # R Homestuck's Rules for thee (enemyTurn does the skipping)
+    info['skipEnemyTurn'] = True
+    parts.append("the enemies lose their next turn")
+  if params.get('allyCost'):
+    # every other teammate pays a % of their max hp (like the other hp costs, it can't knock anyone out)
+    paid = [f"**{displayName(discordID, side, unit)}** lost {payHP(discordID, side, unit, maxHP(discordID, side, unit) * params['allyCost'] / 100)} HP"
+            for unit in aliveUnits(discordID, side) if unit != actor]
+    if paid:
+      parts.append(", ".join(paid))
 
   # Option D: buffs for your own side (whole team with C, picked teammate with G, otherwise yourself)
   if 'D' in letters:
@@ -386,6 +427,16 @@ def resolveMove(discordID, move, letters, params, chosenTarget):
         cleanse(discordID, side, target)
         addStatus(discordID, side, target, "Stabilized", turns=turns, addStacks=0, debuffImmune=True)
       parts.append(f"{'self' if who == 'self' else who} can't be debuffed{turnsText(turns)}")
+    if params.get('damageImmune'):
+      # SR Noah's Defense Lawyer: no damage at all while it lasts
+      for target in targets:
+        addStatus(discordID, side, target, "Lawyered Up", turns=turns, addStacks=0, damageImmune=True)
+      parts.append(f"{'self' if who == 'self' else who} can't take damage{turnsText(turns)}")
+    if params.get('sureHitsNextTurn'):
+      # R Jaiden's Commitment: every attack they make on their next turn hits (optionChecks takes it off after that turn)
+      for target in targets:
+        addStatus(discordID, side, target, params['sureHitsNextTurn'], addStacks=0, sureHits=True)
+      parts.append(f"{'self' if who == 'self' else who} can't miss next turn")
 
   # Option E with no enemy target letter: the debuff lands on yourself (Sleep) or a random teammate (Option O, Plunder)
   hostile = 'A' in letters or 'B' in letters or 'F' in letters
@@ -475,14 +526,26 @@ def hostileMove(discordID, move, letters, params, chosenTarget):
     parts.append("but there was nobody to hit")
     return
 
+  # R Max's Brick Eating: the first attack after it misses no matter what
+  full = next((effect for effect in getEffects(discordID, side, actor) if effect.get('sureMiss')), None) if 'A' in letters else None
+  if full:
+    removeEffect(discordID, full)
+    parts.append(f"missed {groupName(discordID, foeSide, targets)} ({full['name']} 🧱)")
+    return
+
   # Option I: HIYAAAHHH! turns its stacks into extra damage (this is the "extra parameter" for Option A)
-  bonus = 0
+  bonus, flatBonus = 0, 0
   if 'I' in letters and 'consumeStacks' in params:
     consume = params['consumeStacks']
     count = stackCount(discordID, side, actor, consume['name'])
     removeStatus(discordID, side, actor, consume['name'])
-    bonus = count * consume.get('bonusPerStack', 10)
-    parts.append(f"cashed in {count} {consume['name']} for +{bonus:g}% damage" if count else f"no {consume['name']} stacks to cash in")
+    if 'flatPerStack' in consume:
+      flatBonus = count * consume['flatPerStack']  # flat damage for each stack
+      gained = f"+{flatBonus:g} damage"
+    else:
+      bonus = count * consume.get('bonusPerStack', 10)  # % damage for each stack
+      gained = f"+{bonus:g}% damage"
+    parts.append(f"cashed in {count} {consume['name']} for {gained}" if count else f"no {consume['name']} stacks to cash in")
 
   rollsToHit = 'A' in letters or 'accuracy' in params
   lingering = params.get('lingering') if 'M' in letters else None
@@ -515,6 +578,10 @@ def hostileMove(discordID, move, letters, params, chosenTarget):
         continue
 
     if 'A' in letters:
+      # SR Noah's Defense Lawyer: a target that can't take damage ignores the whole hit
+      if isDamageImmune(discordID, foeSide, target):
+        parts.append(f"{targetName} is protected and takes no damage")
+        continue
       # R Noah's Interfere (Option N) can cancel a hit aimed at them
       if tryInterfere(discordID, foeSide, target, parts):
         continue
@@ -524,12 +591,16 @@ def hostileMove(discordID, move, letters, params, chosenTarget):
       if any(effect.get('doomOnHit') for effect in getEffects(discordID, foeSide, target)):
         addStatus(discordID, side, actor, "Doom Mark", addStacks=1, stackLabel=True)
         markedAttacker = True
-      damage, note = computeDamage(discordID, side, actor, foeSide, target, params, bonus)
+      damage, note = computeDamage(discordID, side, actor, foeSide, target, params, bonus, flatBonus)
+      damage, crit = item_helper.criticalHit(discordID, side, damage)  # crit_chance items (Lucky Coin)
       totalDealt += dealDamage(discordID, foeSide, target, damage)
-      parts.append(f"{note}hit {targetName} for {damage}")
+      parts.append(f"{note}hit {targetName} for {damage}{crit}")
       if markedAttacker:
         parts.append(f"**{displayName(discordID, side, actor)}** got a Doom Mark")
       afterHit(discordID, foeSide, target, letters, params, parts)
+      itemText = item_helper.hitLanded(discordID, side, actor, move['ability'], foeSide, target)  # on-hit items (Knife Noir)
+      if itemText:
+        parts.append(itemText)
 
     if not isAlive(discordID, foeSide, target):
       continue
@@ -600,8 +671,9 @@ def accEvaCheck(discordID, side, attacker, target, params=None):
   # returns 1 of 3 things, 0 = Hit, 1 = Miss, 2 = Evade
   params = params or {}
   targetSide = otherSide(side)
-  # "sureHit" moves and Motionless targets (Nihilism) always get hit
-  if params.get('sureHit') or any(effect.get('sureHitAgainst') for effect in getEffects(discordID, targetSide, target)):
+  # "sureHit" moves, Motionless targets (Nihilism) and Committed attackers (R Jaiden's Commitment) always hit
+  if (params.get('sureHit') or any(effect.get('sureHitAgainst') for effect in getEffects(discordID, targetSide, target))
+      or any(effect.get('sureHits') for effect in getEffects(discordID, side, attacker))):
     return 0
   # accuracy check ("accuracy" in the move replaces the user's accuracy, like Cheesy Fries 70%)
   accuracy = params.get('accuracy', battleStats[discordID][side][attacker]['accuracy']) + statModifier(discordID, side, attacker, 'DD')
@@ -612,8 +684,8 @@ def accEvaCheck(discordID, side, attacker, target, params=None):
     return 2
   return 0
 
-def computeDamage(discordID, attackerSide, attacker, targetSide, target, params, bonus=0):
-  # Option A: attack stat (or flat / % hp / dice) -> attack buffs (BB) + bonus % -> target's defense buffs (CC)
+def computeDamage(discordID, attackerSide, attacker, targetSide, target, params, bonus=0, flatBonus=0):
+  # Option A: attack stat (or flat / % hp / dice) -> attack buffs (BB) + bonus % -> + flatBonus -> target's defense buffs (CC)
   # Returns (damage, text for the log like "rolled a 4 ")
   note = ""
   scales = True  # % hp damage doesn't get stronger with attack buffs
@@ -634,6 +706,7 @@ def computeDamage(discordID, attackerSide, attacker, targetSide, target, params,
     base = battleStats[discordID][attackerSide][attacker]['attack'] * params.get('power', 100) / 100
   if scales:
     base *= max(0, 1 + (statModifier(discordID, attackerSide, attacker, 'BB') + bonus) / 100)
+  base += flatBonus  # flat extra damage (HIYAAAHHH! stacks), attack buffs don't change it but the target's defense does
   if not params.get('trueDamage'):
     base *= damageTakenMultiplier(discordID, targetSide, target)
   return max(1, round(base)), note
@@ -825,6 +898,9 @@ def skipsTurn(discordID, side, unit):
 def isDebuffImmune(discordID, side, unit):
   return any(effect.get('debuffImmune') for effect in getEffects(discordID, side, unit))
 
+def isDamageImmune(discordID, side, unit):
+  return any(effect.get('damageImmune') for effect in getEffects(discordID, side, unit))
+
 
 # ============================================================================
 # STATS / HP
@@ -851,7 +927,9 @@ def evasionStat(discordID, side, unit):
 
 def damageTakenMultiplier(discordID, side, unit):
   # CC +30 = take 30% less damage, CC -25 = take 25% more
-  return max(0, 1 - statModifier(discordID, side, unit, 'CC') / 100)
+  # an equipped item's defense bonus counts the same way
+  defense = statModifier(discordID, side, unit, 'CC') + battleStats[discordID][side][unit].get('itemDefense', 0)
+  return max(0, 1 - defense / 100)
 
 def isAlive(discordID, side, unit):
   return battleStats[discordID][side][unit]['ehp'] > 0
@@ -865,7 +943,7 @@ def otherSide(side):
 def dealDamage(discordID, side, unit, amount):
   # takes hp away and returns the damage done, 0 hp = defeated
   stats = battleStats[discordID][side][unit]
-  if stats['ehp'] <= 0:
+  if stats['ehp'] <= 0 or isDamageImmune(discordID, side, unit):
     return 0
   amount = max(0, int(round(amount)))
   stats['ehp'] = max(0, stats['ehp'] - amount)
@@ -970,8 +1048,8 @@ def getTargetChoices(discordID, abilityIndex):
   if not 0 <= abilityIndex < len(abilityNames):
     return None
   letters, params = splitOptions(abilities[abilityNames[abilityIndex]])
-  if 'O' in letters and params.get('outcomes'):
-    return None  # random outcome, nothing to pick
+  if 'O' in letters and params.get('outcomes') and 'F' not in letters:
+    return None  # random outcome, nothing to pick (an F next to the outcomes means the enemy gets picked first, like Pick Up)
   if ('F' in letters or 'A' in letters) and 'B' not in letters:
     side = 'enemies'
   elif 'G' in letters and 'C' not in letters:
